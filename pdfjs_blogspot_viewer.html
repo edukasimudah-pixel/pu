@@ -1,212 +1,36 @@
-{`<!DOCTYPE html>
-<html lang="id">
-<head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!DOCTYPE html><html lang="id"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1">
 <title>SehatiCenter Reader</title>
-
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
-body{
-  background:#000;
-  color:#fff;
-  font-family:Arial,Helvetica,sans-serif;
-  overflow-x:hidden;
-}
-#topbar{
-  position:sticky;
-  top:0;
-  z-index:999;
-  background:#111;
-  display:flex;
-  align-items:center;
-  gap:8px;
-  padding:10px;
-  border-bottom:1px solid #222;
-}
-.logo{
-  font-weight:bold;
-  color:#4da3ff;
-  margin-right:auto;
-}
-button{
-  background:#222;
-  color:#fff;
-  border:none;
-  border-radius:8px;
-  padding:8px 10px;
-  cursor:pointer;
-}
-button:hover{background:#333}
-#progress{
-  height:4px;
-  background:#222;
-}
-#bar{
-  height:100%;
-  width:0%;
-  background:#4da3ff;
-}
-#viewer{
-  max-width:900px;
-  margin:auto;
-  transform-origin:top center;
-}
-canvas{
-  display:block;
-  width:100%;
-  height:auto;
-  margin:0 auto 2px;
-  background:#fff;
-}
-.dark canvas{
-  filter:invert(1) hue-rotate(180deg);
-}
-#toast{
-  position:fixed;
-  bottom:20px;
-  left:50%;
-  transform:translateX(-50%);
-  background:#111;
-  padding:10px 16px;
-  border-radius:30px;
-  display:none;
-}
-</style>
-</head>
-<body>
-
-<div id="topbar">
-  <div class="logo">SEHATICENTER</div>
-
-  <button onclick="zoomOut()">➖</button>
-  <button onclick="zoomIn()">➕</button>
-  <button onclick="toggleDark()">🌙</button>
-  <button onclick="saveBookmark()">🔖</button>
-  <button onclick="goFull()">⛶</button>
-</div>
-
-<div id="progress"><div id="bar"></div></div>
-
-<div id="viewer"></div>
-
-<div id="toast"></div>
-
+*{margin:0;padding:0;box-sizing:border-box}body{background:#000;color:#fff;font-family:Arial}
+#top{position:fixed;top:0;left:0;right:0;height:52px;background:#111;display:flex;align-items:center;padding:8px;gap:6px;z-index:99}
+.logo{font-weight:bold;color:#60a5fa;margin-right:auto}.btn{background:#2563eb;border:none;color:#fff;border-radius:8px;padding:8px 10px}
+#prog{position:fixed;top:52px;left:0;right:0;height:3px;background:#222;z-index:98}#bar{height:100%;width:0;background:#60a5fa}
+#viewer{padding-top:58px;transform-origin:top center;max-width:760px;margin:auto;touch-action:none}
+canvas{display:block;width:100%;height:auto;background:#fff;margin-bottom:2px}.dark canvas{filter:invert(1) hue-rotate(180deg)}
+#toast{position:fixed;bottom:18px;left:50%;transform:translateX(-50%);background:#111;padding:10px 14px;border-radius:20px;display:none}
+</style></head><body>
+<div id="top"><div class="logo">SEHATICENTER</div><button class="btn" onclick="zoomOut()">−</button><button class="btn" onclick="zoomIn()">+</button><button class="btn" onclick="toggleDark()">🌙</button><button class="btn" onclick="saveBookmark()">🔖</button><button class="btn" onclick="goFS()">⛶</button></div>
+<div id="prog"><div id="bar"></div></div><div id="viewer"></div><div id="toast"></div>
 <script type="module">
 import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
-
-const params=new URLSearchParams(location.search);
-const comic=params.get("comic") || "Dwikora.pdf";
-
-const pdf=await pdfjsLib.getDocument(comic).promise;
-const viewer=document.getElementById("viewer");
-
-for(let i=1;i<=pdf.numPages;i++){
-  const page=await pdf.getPage(i);
-  const viewport=page.getViewport({scale:1.6});
-
-  const canvas=document.createElement("canvas");
-  const ctx=canvas.getContext("2d");
-
-  canvas.width=viewport.width;
-  canvas.height=viewport.height;
-
-  await page.render({
-    canvasContext:ctx,
-    viewport
-  }).promise;
-
-  viewer.appendChild(canvas);
-}
-
-const key="bookmark_"+comic;
-const mark=localStorage.getItem(key);
-if(mark) window.scrollTo(0,Number(mark));
+const comic=new URLSearchParams(location.search).get("comic")||"Dwikora.pdf";
+const pdf=await pdfjsLib.getDocument(comic).promise;const v=document.getElementById("viewer");
+for(let i=1;i<=pdf.numPages;i++){const p=await pdf.getPage(i);const vp=p.getViewport({scale:1.6});const c=document.createElement("canvas");c.width=vp.width;c.height=vp.height;await p.render({canvasContext:c.getContext("2d"),viewport:vp}).promise;v.appendChild(c)}
+const k="bm_"+comic,m=localStorage.getItem(k);if(m)scrollTo(0,+m);
 </script>
-
 <script>
-let zoom=1;
-const viewer=document.getElementById("viewer");
-
-function applyZoom(){
-  viewer.style.transform="scale("+zoom+")";
-  viewer.style.marginBottom=((zoom-1)*100)+"vh";
-}
-
-window.zoomIn=()=>{
-  zoom=Math.min(3,zoom+0.2);
-  applyZoom();
-}
-
-window.zoomOut=()=>{
-  zoom=Math.max(0.6,zoom-0.2);
-  applyZoom();
-}
-
-window.toggleDark=()=>{
-  document.body.classList.toggle("dark");
-}
-
-window.goFull=()=>{
-  if(!document.fullscreenElement)
-    document.documentElement.requestFullscreen();
-  else
-    document.exitFullscreen();
-}
-
-function toast(txt){
-  const t=document.getElementById("toast");
-  t.innerHTML=txt;
-  t.style.display="block";
-  setTimeout(()=>t.style.display="none",1500);
-}
-
-window.saveBookmark=()=>{
-  const comic=new URLSearchParams(location.search).get("comic")||"Dwikora.pdf";
-  localStorage.setItem("bookmark_"+comic,window.scrollY);
-  toast("Bookmark tersimpan");
-}
-
-window.addEventListener("scroll",()=>{
-  const h=document.documentElement;
-  const p=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;
-  document.getElementById("bar").style.width=p+"%";
-});
-
-document.addEventListener("keydown",e=>{
-  if((e.ctrlKey||e.metaKey)&&["p","s"].includes(e.key.toLowerCase())){
-    e.preventDefault();
-    toast("Fitur dinonaktifkan");
-  }
-});
-
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("dragstart",e=>e.preventDefault());
-
-let startDist=0;
-document.addEventListener("touchstart",e=>{
-  if(e.touches.length===2){
-    startDist=Math.hypot(
-      e.touches[0].clientX-e.touches[1].clientX,
-      e.touches[0].clientY-e.touches[1].clientY
-    );
-  }
-});
-
-document.addEventListener("touchmove",e=>{
-  if(e.touches.length===2){
-    e.preventDefault();
-    const d=Math.hypot(
-      e.touches[0].clientX-e.touches[1].clientX,
-      e.touches[0].clientY-e.touches[1].clientY
-    );
-    if(d>startDist+20) zoomIn();
-    if(d<startDist-20) zoomOut();
-    startDist=d;
-  }
-},{passive:false});
-</script>
-
-</body>
-</html>`}
+let zoom=1;const v=document.getElementById("viewer"),t=document.getElementById("toast");
+function show(s){t.textContent=s;t.style.display="block";setTimeout(()=>t.style.display="none",1200)}
+function apply(){v.style.transform=`scale(${zoom})`;v.style.marginBottom=((zoom-1)*120)+"vh"}
+window.zoomIn=()=>{zoom=Math.min(3,zoom+.2);apply();show(Math.round(zoom*100)+"%")}
+window.zoomOut=()=>{zoom=Math.max(.5,zoom-.2);apply();show(Math.round(zoom*100)+"%")}
+window.toggleDark=()=>{document.body.classList.toggle("dark");show(document.body.classList.contains("dark")?"Mode Gelap":"Mode Terang")}
+window.saveBookmark=()=>{const c=new URLSearchParams(location.search).get("comic")||"Dwikora.pdf";localStorage.setItem("bm_"+c,scrollY);show("Bookmark Tersimpan")}
+window.goFS=()=>!document.fullscreenElement?document.documentElement.requestFullscreen():document.exitFullscreen();
+addEventListener("scroll",()=>{const d=document.documentElement,p=(d.scrollTop/(d.scrollHeight-d.clientHeight))*100;document.getElementById("bar").style.width=p+"%"})
+document.addEventListener("keydown",e=>{if((e.ctrlKey||e.metaKey)&&["p","s"].includes(e.key.toLowerCase())){e.preventDefault();show("Dinonaktifkan")}})
+document.addEventListener("contextmenu",e=>e.preventDefault());document.addEventListener("dragstart",e=>e.preventDefault());
+let sd=0;v.addEventListener("touchstart",e=>{if(e.touches.length==2)sd=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY)},{passive:false});
+v.addEventListener("touchmove",e=>{if(e.touches.length==2){e.preventDefault();let d=Math.hypot(e.touches[0].clientX-e.touches[1].clientX,e.touches[0].clientY-e.touches[1].clientY);zoom=Math.max(.5,Math.min(3,zoom*(d/sd)));sd=d;apply()}},{passive:false});
+</script></body></html>
