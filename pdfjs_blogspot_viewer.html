@@ -25,7 +25,7 @@ import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
 // GANTI DENGAN LINK PDF KAMU
-const url="PDF_URL";
+const url = "./Dwikora.pdf";
 
 const pdf=await pdfjsLib.getDocument(url).promise;
 const viewer=document.getElementById("viewer");
