@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pembaca Komik PDF.js</title>
+<style>
+html,body{margin:0;background:#000;font-family:Arial,sans-serif}
+#topbar{position:sticky;top:0;z-index:10;background:#111;padding:10px;display:flex;gap:8px;align-items:center}
+button{background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
+#viewer{max-width:720px;margin:auto}
+canvas{width:100%;height:auto;display:block;margin:0 auto 2px;background:#fff}
+</style>
+</head>
+<body>
+<div id="topbar">
+  <button onclick="toggleFullscreen()">⛶ Full Screen</button>
+  <span style="color:#fff">Pertarungan Udara</span>
+</div>
+<div id="viewer"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs" type="module"></script>
+<script type="module">
+import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
+pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
+
+// GANTI DENGAN LINK PDF KAMU
+const url="PDF_URL";
+
+const pdf=await pdfjsLib.getDocument(url).promise;
+const viewer=document.getElementById("viewer");
+
+for(let p=1;p<=pdf.numPages;p++){
+ const page=await pdf.getPage(p);
+ const viewport=page.getViewport({scale:1.5});
+ const canvas=document.createElement("canvas");
+ const ctx=canvas.getContext("2d");
+ canvas.width=viewport.width;
+ canvas.height=viewport.height;
+ await page.render({canvasContext:ctx,viewport}).promise;
+ viewer.appendChild(canvas);
+}
+</script>
+<script>
+window.toggleFullscreen=()=>{
+ const el=document.documentElement;
+ if(!document.fullscreenElement) el.requestFullscreen();
+ else document.exitFullscreen();
+}
+document.addEventListener("contextmenu",e=>e.preventDefault());
+document.addEventListener("dragstart",e=>e.preventDefault());
+</script>
+</body>
+</html>
