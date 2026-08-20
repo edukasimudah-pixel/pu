@@ -1,54 +1,212 @@
-<!DOCTYPE html>
+{`<!DOCTYPE html>
 <html lang="id">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Pembaca Komik PDF.js</title>
+<title>SehatiCenter Reader</title>
+
 <style>
-html,body{margin:0;background:#000;font-family:Arial,sans-serif}
-#topbar{position:sticky;top:0;z-index:10;background:#111;padding:10px;display:flex;gap:8px;align-items:center}
-button{background:#2563eb;color:#fff;border:none;padding:8px 12px;border-radius:6px;cursor:pointer}
-#viewer{max-width:720px;margin:auto}
-canvas{width:100%;height:auto;display:block;margin:0 auto 2px;background:#fff}
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+  background:#000;
+  color:#fff;
+  font-family:Arial,Helvetica,sans-serif;
+  overflow-x:hidden;
+}
+#topbar{
+  position:sticky;
+  top:0;
+  z-index:999;
+  background:#111;
+  display:flex;
+  align-items:center;
+  gap:8px;
+  padding:10px;
+  border-bottom:1px solid #222;
+}
+.logo{
+  font-weight:bold;
+  color:#4da3ff;
+  margin-right:auto;
+}
+button{
+  background:#222;
+  color:#fff;
+  border:none;
+  border-radius:8px;
+  padding:8px 10px;
+  cursor:pointer;
+}
+button:hover{background:#333}
+#progress{
+  height:4px;
+  background:#222;
+}
+#bar{
+  height:100%;
+  width:0%;
+  background:#4da3ff;
+}
+#viewer{
+  max-width:900px;
+  margin:auto;
+  transform-origin:top center;
+}
+canvas{
+  display:block;
+  width:100%;
+  height:auto;
+  margin:0 auto 2px;
+  background:#fff;
+}
+.dark canvas{
+  filter:invert(1) hue-rotate(180deg);
+}
+#toast{
+  position:fixed;
+  bottom:20px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#111;
+  padding:10px 16px;
+  border-radius:30px;
+  display:none;
+}
 </style>
 </head>
 <body>
+
 <div id="topbar">
-  <button onclick="toggleFullscreen()">⛶ Full Screen</button>
-  <span style="color:#fff">Pertarungan Udara</span>
+  <div class="logo">SEHATICENTER</div>
+
+  <button onclick="zoomOut()">➖</button>
+  <button onclick="zoomIn()">➕</button>
+  <button onclick="toggleDark()">🌙</button>
+  <button onclick="saveBookmark()">🔖</button>
+  <button onclick="goFull()">⛶</button>
 </div>
+
+<div id="progress"><div id="bar"></div></div>
+
 <div id="viewer"></div>
 
-<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs" type="module"></script>
+<div id="toast"></div>
+
 <script type="module">
 import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 pdfjsLib.GlobalWorkerOptions.workerSrc="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
-// GANTI DENGAN LINK PDF KAMU
-const url = "./Dwikora.pdf";
+const params=new URLSearchParams(location.search);
+const comic=params.get("comic") || "Dwikora.pdf";
 
-const pdf=await pdfjsLib.getDocument(url).promise;
+const pdf=await pdfjsLib.getDocument(comic).promise;
 const viewer=document.getElementById("viewer");
 
-for(let p=1;p<=pdf.numPages;p++){
- const page=await pdf.getPage(p);
- const viewport=page.getViewport({scale:1.5});
- const canvas=document.createElement("canvas");
- const ctx=canvas.getContext("2d");
- canvas.width=viewport.width;
- canvas.height=viewport.height;
- await page.render({canvasContext:ctx,viewport}).promise;
- viewer.appendChild(canvas);
+for(let i=1;i<=pdf.numPages;i++){
+  const page=await pdf.getPage(i);
+  const viewport=page.getViewport({scale:1.6});
+
+  const canvas=document.createElement("canvas");
+  const ctx=canvas.getContext("2d");
+
+  canvas.width=viewport.width;
+  canvas.height=viewport.height;
+
+  await page.render({
+    canvasContext:ctx,
+    viewport
+  }).promise;
+
+  viewer.appendChild(canvas);
 }
+
+const key="bookmark_"+comic;
+const mark=localStorage.getItem(key);
+if(mark) window.scrollTo(0,Number(mark));
 </script>
+
 <script>
-window.toggleFullscreen=()=>{
- const el=document.documentElement;
- if(!document.fullscreenElement) el.requestFullscreen();
- else document.exitFullscreen();
+let zoom=1;
+const viewer=document.getElementById("viewer");
+
+function applyZoom(){
+  viewer.style.transform="scale("+zoom+")";
+  viewer.style.marginBottom=((zoom-1)*100)+"vh";
 }
+
+window.zoomIn=()=>{
+  zoom=Math.min(3,zoom+0.2);
+  applyZoom();
+}
+
+window.zoomOut=()=>{
+  zoom=Math.max(0.6,zoom-0.2);
+  applyZoom();
+}
+
+window.toggleDark=()=>{
+  document.body.classList.toggle("dark");
+}
+
+window.goFull=()=>{
+  if(!document.fullscreenElement)
+    document.documentElement.requestFullscreen();
+  else
+    document.exitFullscreen();
+}
+
+function toast(txt){
+  const t=document.getElementById("toast");
+  t.innerHTML=txt;
+  t.style.display="block";
+  setTimeout(()=>t.style.display="none",1500);
+}
+
+window.saveBookmark=()=>{
+  const comic=new URLSearchParams(location.search).get("comic")||"Dwikora.pdf";
+  localStorage.setItem("bookmark_"+comic,window.scrollY);
+  toast("Bookmark tersimpan");
+}
+
+window.addEventListener("scroll",()=>{
+  const h=document.documentElement;
+  const p=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;
+  document.getElementById("bar").style.width=p+"%";
+});
+
+document.addEventListener("keydown",e=>{
+  if((e.ctrlKey||e.metaKey)&&["p","s"].includes(e.key.toLowerCase())){
+    e.preventDefault();
+    toast("Fitur dinonaktifkan");
+  }
+});
+
 document.addEventListener("contextmenu",e=>e.preventDefault());
 document.addEventListener("dragstart",e=>e.preventDefault());
+
+let startDist=0;
+document.addEventListener("touchstart",e=>{
+  if(e.touches.length===2){
+    startDist=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+  }
+});
+
+document.addEventListener("touchmove",e=>{
+  if(e.touches.length===2){
+    e.preventDefault();
+    const d=Math.hypot(
+      e.touches[0].clientX-e.touches[1].clientX,
+      e.touches[0].clientY-e.touches[1].clientY
+    );
+    if(d>startDist+20) zoomIn();
+    if(d<startDist-20) zoomOut();
+    startDist=d;
+  }
+},{passive:false});
 </script>
+
 </body>
-</html>
+</html>`}
