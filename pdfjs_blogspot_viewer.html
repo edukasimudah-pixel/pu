@@ -6,9 +6,9 @@
 
 <meta name="viewport"
       content="width=device-width,
-               initial-scale=1.0,
-               maximum-scale=5.0,
-               viewport-fit=cover">
+      initial-scale=1.0,
+      maximum-scale=5.0,
+      viewport-fit=cover">
 
 <title>PDF Reader</title>
 
@@ -71,7 +71,7 @@ body{
   width:40px;
   height:40px;
 
-  border:none;
+  border:0;
   border-radius:8px;
 
   background:#2563EB;
@@ -115,54 +115,42 @@ body{
 
 
 /* =====================================================
-   NORMAL VIEWPORT
+   NORMAL READER
    ===================================================== */
 
-#viewport{
-
-  position:relative;
-
+#reader{
   width:100%;
 
   margin-top:59px;
 
-  min-height:calc(100vh - 59px);
+  position:relative;
 
   overflow:visible;
-
-  background:#0b0b0b;
-
-  /*
-   * PENTING:
-   * Pada 100% browser boleh scroll.
-   */
-
-  touch-action:pan-y;
 }
 
 
 /* =====================================================
-   DOCUMENT
+   PDF DOCUMENT
    ===================================================== */
 
 #document{
 
-  position:relative;
-
   width:100%;
+
   max-width:780px;
 
   margin:0 auto;
 
+  position:relative;
+
   transform:none;
 
-  transform-origin:top left;
-
+  transform-origin:0 0;
 }
 
 
 /* =====================================================
-   CANVAS
+   PDF CANVAS
    ===================================================== */
 
 #document canvas{
@@ -186,15 +174,33 @@ body{
 
 
 /* =====================================================
-   ZOOM MODE
+   ZOOM VIEWPORT
    ===================================================== */
 
-body.zoom-mode{
-  overflow:hidden;
+#zoomViewport{
+
+  display:none;
 }
 
 
-body.zoom-mode #viewport{
+/*
+   Saat zoom, halaman PDF dipindahkan
+   ke viewport khusus.
+*/
+
+body.zooming{
+
+  overflow:hidden;
+}
+
+body.zooming #reader{
+
+  display:none;
+}
+
+body.zooming #zoomViewport{
+
+  display:block;
 
   position:fixed;
 
@@ -203,49 +209,66 @@ body.zoom-mode #viewport{
   right:0;
   bottom:0;
 
-  width:auto;
-  height:auto;
-
-  margin:0;
-
-  min-height:0;
-
   overflow:hidden;
 
-  /*
-   * Gesture kita yang tangani.
-   */
+  background:#0b0b0b;
+
+  z-index:20;
 
   touch-action:none;
-
 }
 
 
-body.zoom-mode #document{
+/* =====================================================
+   ZOOM DOCUMENT
+   ===================================================== */
+
+#zoomDocument{
 
   position:absolute;
 
-  top:0;
   left:0;
+  top:0;
 
   width:780px;
-  max-width:none;
 
-  margin:0;
-
-  transform-origin:top left;
+  transform-origin:0 0;
 
   will-change:transform;
 
 }
 
 
+/*
+   Kita akan memasukkan canvas yang sama
+   ke dalam zoomDocument.
+*/
+
+#zoomDocument canvas{
+
+  display:block;
+
+  width:780px;
+  height:auto;
+
+  background:#fff;
+
+  margin-bottom:2px;
+
+  pointer-events:none;
+
+}
+
+
 /* =====================================================
-   DARK MODE
+   DARK
    ===================================================== */
 
-.dark #document canvas{
+.dark #document canvas,
+.dark #zoomDocument canvas{
+
   filter:invert(1) hue-rotate(180deg);
+
 }
 
 
@@ -288,7 +311,6 @@ body.zoom-mode #document{
   display:block;
 
   width:100%;
-
   height:auto;
 
   margin-bottom:6px;
@@ -299,9 +321,9 @@ body.zoom-mode #document{
 
   cursor:pointer;
 
-  pointer-events:auto;
-
   touch-action:manipulation;
+
+  pointer-events:auto;
 }
 
 
@@ -319,7 +341,8 @@ body.zoom-mode #document{
   width:52px;
   height:52px;
 
-  border:none;
+  border:0;
+
   border-radius:50%;
 
   background:#2563EB;
@@ -333,7 +356,6 @@ body.zoom-mode #document{
   z-index:10002;
 
   touch-action:manipulation;
-
 }
 
 
@@ -350,11 +372,11 @@ body.zoom-mode #document{
 
   transform:translateX(-50%);
 
-  padding:10px 16px;
-
   background:#111;
 
   color:#fff;
+
+  padding:10px 16px;
 
   border-radius:20px;
 
@@ -363,7 +385,6 @@ body.zoom-mode #document{
   z-index:10003;
 
   white-space:nowrap;
-
 }
 
 
@@ -380,7 +401,6 @@ body.zoom-mode #document{
     padding:6px 8px;
 
     gap:6px;
-
   }
 
   .btn{
@@ -389,25 +409,18 @@ body.zoom-mode #document{
     height:38px;
 
     font-size:17px;
-
   }
 
   #progress{
     top:52px;
   }
 
-  #viewport{
-
+  #reader{
     margin-top:55px;
-
-    min-height:calc(100vh - 55px);
-
   }
 
-  body.zoom-mode #viewport{
-
+  body.zooming #zoomViewport{
     top:55px;
-
   }
 
 }
@@ -425,7 +438,6 @@ body.zoom-mode #document{
 
     padding-left:5px;
     padding-right:5px;
-
   }
 
   .btn{
@@ -434,7 +446,6 @@ body.zoom-mode #document{
     height:36px;
 
     font-size:16px;
-
   }
 
 }
@@ -454,29 +465,19 @@ body.zoom-mode #document{
 <div id="top">
 
   <button class="btn"
-          onclick="zoomOut()">
-    −
-  </button>
+          onclick="zoomOut()">−</button>
 
   <button class="btn"
-          onclick="zoomIn()">
-    +
-  </button>
+          onclick="zoomIn()">+</button>
 
   <button class="btn"
-          onclick="toggleDark()">
-    🌙
-  </button>
+          onclick="toggleDark()">🌙</button>
 
   <button class="btn"
-          onclick="saveBookmark()">
-    🔖
-  </button>
+          onclick="saveBookmark()">🔖</button>
 
   <button class="btn"
-          onclick="goFull()">
-    ⛶
-  </button>
+          onclick="goFull()">⛶</button>
 
 </div>
 
@@ -491,12 +492,23 @@ body.zoom-mode #document{
 
 
 <!-- =====================================================
-     VIEWPORT
+     NORMAL READER
      ===================================================== -->
 
-<div id="viewport">
+<div id="reader">
 
   <div id="document"></div>
+
+</div>
+
+
+<!-- =====================================================
+     ZOOM VIEWPORT
+     ===================================================== -->
+
+<div id="zoomViewport">
+
+  <div id="zoomDocument"></div>
 
 </div>
 
@@ -507,20 +519,11 @@ body.zoom-mode #document{
 
 <div id="thumbs"></div>
 
-
 <button id="thumbBtn"
-        onclick="toggleThumbs()">
-  ☰
-</button>
-
+        onclick="toggleThumbs()">☰</button>
 
 <div id="toast"></div>
 
-
-
-<!-- =====================================================
-     PDF.JS
-     ===================================================== -->
 
 <script type="module">
 
@@ -528,27 +531,30 @@ import * as pdfjsLib from
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 
 
-pdfjsLib.GlobalWorkerOptions.workerSrc =
+pdfjsLib.GlobalWorkerOptions.workerSrc=
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
 
 /* =====================================================
-   PDF NAME
+   PDF
    ===================================================== */
 
-const comic =
+const comic=
 new URLSearchParams(location.search).get("comic")
-|| "Dwikora.pdf";
+||"Dwikora.pdf";
 
 
 /* =====================================================
    ELEMENT
    ===================================================== */
 
-const documentLayer =
+const normalDocument=
 document.getElementById("document");
 
-const thumbs =
+const zoomDocument=
+document.getElementById("zoomDocument");
+
+const thumbs=
 document.getElementById("thumbs");
 
 
@@ -556,12 +562,12 @@ document.getElementById("thumbs");
    LOAD PDF
    ===================================================== */
 
-const pdf =
+const pdf=
 await pdfjsLib.getDocument(comic).promise;
 
 
 /* =====================================================
-   RENDER PDF
+   RENDER
    ===================================================== */
 
 for(
@@ -570,30 +576,34 @@ for(
   i++
 ){
 
-  const page =
+  const page=
   await pdf.getPage(i);
 
 
-  /* =================================================
-     MAIN PAGE
-     ================================================= */
+  /*
+   * -----------------------------------------------
+   * NORMAL CANVAS
+   * -----------------------------------------------
+   */
 
-  const viewport =
+  const vp=
   page.getViewport({
     scale:1.6
   });
 
 
-  const canvas =
+  const canvas=
   document.createElement("canvas");
 
 
-  canvas.width =
-  viewport.width;
+  canvas.width=
+  vp.width;
+
+  canvas.height=
+  vp.height;
 
 
-  canvas.height =
-  viewport.height;
+  canvas.dataset.page=i;
 
 
   await page.render({
@@ -601,44 +611,73 @@ for(
     canvasContext:
       canvas.getContext("2d"),
 
-    viewport:
-      viewport
+    viewport:vp
 
   }).promise;
 
 
+  normalDocument.appendChild(canvas);
+
+
   /*
-   * Simpan nomor halaman.
+   * -----------------------------------------------
+   * ZOOM CANVAS
+   *
+   * Canvas terpisah agar ukuran normal
+   * dan ukuran zoom tidak saling mengganggu.
+   * -----------------------------------------------
    */
 
-  canvas.dataset.page=i;
+  const zoomCanvas=
+  document.createElement("canvas");
 
 
-  documentLayer.appendChild(
-    canvas
+  zoomCanvas.width=
+  vp.width;
+
+  zoomCanvas.height=
+  vp.height;
+
+
+  zoomCanvas.dataset.page=i;
+
+
+  await page.render({
+
+    canvasContext:
+      zoomCanvas.getContext("2d"),
+
+    viewport:vp
+
+  }).promise;
+
+
+  zoomDocument.appendChild(
+    zoomCanvas
   );
 
 
-  /* =================================================
-     THUMBNAIL
-     ================================================= */
+  /*
+   * -----------------------------------------------
+   * THUMBNAIL
+   * -----------------------------------------------
+   */
 
-  const thumbViewport =
+  const tv=
   page.getViewport({
     scale:.22
   });
 
 
-  const thumb =
+  const thumb=
   document.createElement("canvas");
 
 
-  thumb.width =
-  thumbViewport.width;
+  thumb.width=
+  tv.width;
 
-
-  thumb.height =
-  thumbViewport.height;
+  thumb.height=
+  tv.height;
 
 
   await page.render({
@@ -646,8 +685,7 @@ for(
     canvasContext:
       thumb.getContext("2d"),
 
-    viewport:
-      thumbViewport
+    viewport:tv
 
   }).promise;
 
@@ -680,7 +718,7 @@ for(
    BOOKMARK LAMA
    ===================================================== */
 
-const saved =
+const saved=
 localStorage.getItem(
   "bm_"+comic
 );
@@ -690,7 +728,7 @@ if(saved){
 
   try{
 
-    const data =
+    const data=
     JSON.parse(saved);
 
 
@@ -708,31 +746,26 @@ if(saved){
 
       },200);
 
-    }else if(
-      typeof data==="number"
-    ){
+    }
+
+  }catch(e){
+
+    const y=
+      Number(saved);
+
+
+    if(!isNaN(y)){
 
       setTimeout(()=>{
 
         window.scrollTo(
           0,
-          data
+          y
         );
 
       },200);
 
     }
-
-  }catch(e){
-
-    setTimeout(()=>{
-
-      window.scrollTo(
-        0,
-        Number(saved)
-      );
-
-    },200);
 
   }
 
@@ -740,11 +773,6 @@ if(saved){
 
 </script>
 
-
-
-<!-- =====================================================
-     READER ENGINE
-     ===================================================== -->
 
 <script>
 
@@ -756,46 +784,53 @@ let zoom=1;
 
 
 /*
- * Posisi document saat zoom.
+ * Koordinat viewport zoom.
  */
 
-let panX=0;
-let panY=0;
+let offsetX=0;
+
+let offsetY=0;
 
 
 /*
- * Posisi browser sebelum masuk zoom.
+ * Posisi PDF yang sedang dilihat
+ * sebelum masuk zoom.
+ */
+
+let anchorX=0;
+
+let anchorY=0;
+
+
+/*
+ * Browser scroll sebelum zoom.
  */
 
 let savedScrollX=0;
+
 let savedScrollY=0;
 
 
 /*
- * Posisi halaman yang sedang dibaca.
+ * Touch.
  */
 
-let savedPage=1;
+let pinch=false;
 
-let savedPageOffset=0;
-
-
-/*
- * Touch state.
- */
-
-let isPinching=false;
-
-let isPanning=false;
+let pan=false;
 
 
 /*
  * Pinch.
  */
 
-let pinchStartDistance=0;
+let pinchDistance=0;
 
-let pinchStartZoom=1;
+let pinchZoom=1;
+
+let pinchPdfX=0;
+
+let pinchPdfY=0;
 
 
 /*
@@ -806,9 +841,9 @@ let panStartX=0;
 
 let panStartY=0;
 
-let panOriginX=0;
+let panStartOffsetX=0;
 
-let panOriginY=0;
+let panStartOffsetY=0;
 
 
 /*
@@ -828,26 +863,36 @@ let mouseStartX=0;
 
 let mouseStartY=0;
 
-let mouseOriginX=0;
+let mouseStartOffsetX=0;
 
-let mouseOriginY=0;
+let mouseStartOffsetY=0;
 
 
 /* =====================================================
    ELEMENT
    ===================================================== */
 
-const viewport =
+const reader=
 document.getElementById(
-  "viewport"
+  "reader"
 );
 
-const documentLayer =
+const viewport=
+document.getElementById(
+  "zoomViewport"
+);
+
+const normalDocument=
 document.getElementById(
   "document"
 );
 
-const toast =
+const zoomDocument=
+document.getElementById(
+  "zoomDocument"
+);
+
+const toast=
 document.getElementById(
   "toast"
 );
@@ -880,105 +925,70 @@ function show(text){
 
 
 /* =====================================================
-   GET CURRENT PAGE
+   CURRENT READING POSITION
    ===================================================== */
 
-function getCurrentPage(){
+function getReadingPosition(){
 
-  const canvases =
-    documentLayer.querySelectorAll(
+  const scrollY=
+    window.scrollY||
+    document.documentElement.scrollTop||
+    0;
+
+
+  const pages=
+    normalDocument.querySelectorAll(
       "canvas"
     );
 
 
-  if(!canvases.length){
+  let pageNumber=1;
 
-    return {
-      page:1,
-      offset:0
-    };
+  let pageTop=0;
+
+
+  for(
+    let i=0;
+    i<pages.length;
+    i++
+  ){
+
+    const top=
+      pages[i].offsetTop;
+
+
+    if(
+      top<=scrollY
+    ){
+
+      pageNumber=i+1;
+
+      pageTop=top;
+
+    }else{
+
+      break;
+
+    }
 
   }
 
 
-  const currentScroll =
-    window.scrollY;
-
-
-  let currentPage=1;
-
-  let bestDistance=Infinity;
-
-  let bestOffset=0;
-
-
-  canvases.forEach(
-    (canvas,index)=>{
-
-      const top =
-        canvas.offsetTop;
-
-
-      const distance =
-        Math.abs(
-          top-currentScroll
-        );
-
-
-      if(distance<bestDistance){
-
-        bestDistance=distance;
-
-        currentPage=index+1;
-
-        bestOffset=
-          currentScroll-top;
-
-      }
-
-    }
-  );
-
-
   return {
 
-    page:currentPage,
+    page:pageNumber,
 
-    offset:bestOffset
+    offset:
+      scrollY-pageTop,
+
+    scrollY:scrollY,
+
+    scrollX:
+      window.scrollX||
+      document.documentElement.scrollLeft||
+      0
 
   };
-
-}
-
-
-/* =====================================================
-   SAVE CURRENT READING POSITION
-   ===================================================== */
-
-function rememberReadingPosition(){
-
-  const current =
-    getCurrentPage();
-
-
-  savedPage=
-    current.page;
-
-
-  savedPageOffset=
-    current.offset;
-
-
-  savedScrollY=
-    window.scrollY ||
-    document.documentElement.scrollTop ||
-    0;
-
-
-  savedScrollX=
-    window.scrollX ||
-    document.documentElement.scrollLeft ||
-    0;
 
 }
 
@@ -997,30 +1007,48 @@ function enterZoom(){
 
 
   /*
-   * Sudah zoom?
+   * Simpan posisi browser hanya
+   * ketika pertama masuk zoom.
    */
 
   if(
     !document.body.classList.contains(
-      "zoom-mode"
+      "zooming"
     )
   ){
 
+    const pos=
+      getReadingPosition();
+
+
+    savedScrollY=
+      pos.scrollY;
+
+
+    savedScrollX=
+      pos.scrollX;
+
+
     /*
-     * Simpan posisi browser.
+     * Posisi PDF berdasarkan posisi
+     * scroll yang sedang dibaca.
      */
 
-    rememberReadingPosition();
+    anchorY=
+      pos.scrollY;
+
+
+    anchorX=0;
 
   }
 
 
   document.body.classList.add(
-    "zoom-mode"
+    "zooming"
   );
 
 
-  apply();
+  applyZoom();
 
 }
 
@@ -1032,90 +1060,131 @@ function enterZoom(){
 function exitZoom(){
 
   /*
-   * Simpan halaman yang sedang
-   * dilihat sebelum keluar.
+   * -----------------------------------------------
+   * Cari posisi PDF yang sedang terlihat
+   * berdasarkan koordinat zoom.
+   * -----------------------------------------------
    */
 
-  const currentPage =
-    savedPage;
-
-
-  const currentOffset =
-    savedPageOffset;
+  const currentPdfY=
+    Math.max(
+      0,
+      -offsetY/zoom
+    );
 
 
   /*
-   * Matikan mode zoom.
+   * Halaman PDF yang berada di sekitar
+   * posisi tersebut.
+   */
+
+  const zoomPages=
+    zoomDocument.querySelectorAll(
+      "canvas"
+    );
+
+
+  let pageNumber=1;
+
+  let pageTop=0;
+
+
+  for(
+    let i=0;
+    i<zoomPages.length;
+    i++
+  ){
+
+    const top=
+      zoomPages[i].offsetTop;
+
+
+    if(
+      top<=currentPdfY
+    ){
+
+      pageNumber=i+1;
+
+      pageTop=top;
+
+    }else{
+
+      break;
+
+    }
+
+  }
+
+
+  /*
+   * Posisi relatif di halaman.
+   */
+
+  const pageOffset=
+    currentPdfY-pageTop;
+
+
+  /*
+   * Kembali ke mode normal.
    */
 
   document.body.classList.remove(
-    "zoom-mode"
+    "zooming"
   );
 
 
-  /*
-   * Hapus transform.
-   */
+  zoom=1;
 
-  documentLayer.style.transform=
+  offsetX=0;
+
+  offsetY=0;
+
+
+  zoomDocument.style.transform=
     "none";
 
 
   /*
-   * Reset posisi custom.
-   */
-
-  panX=0;
-
-  panY=0;
-
-
-  /*
-   * Kembali 100%.
-   */
-
-  zoom=1;
-
-
-  /*
-   * Tunggu browser mengembalikan
-   * layout normal.
+   * Tunggu layout normal.
    */
 
   requestAnimationFrame(()=>{
 
     requestAnimationFrame(()=>{
 
-      const canvases =
-        documentLayer.querySelectorAll(
+      const normalPages=
+        normalDocument.querySelectorAll(
           "canvas"
         );
 
 
-      const page =
-        canvases[currentPage-1];
+      const page=
+        normalPages[pageNumber-1];
 
 
       if(page){
 
-        const pageTop =
-          page.offsetTop;
+        const target=
+          page.offsetTop+
+          pageOffset;
 
 
         window.scrollTo(
 
           savedScrollX,
 
-          pageTop+
-          currentOffset
+          target
 
         );
 
       }else{
 
         window.scrollTo(
+
           savedScrollX,
+
           savedScrollY
+
         );
 
       }
@@ -1131,7 +1200,7 @@ function exitZoom(){
 
 
 /* =====================================================
-   GET DOCUMENT SIZE
+   DOCUMENT SIZE
    ===================================================== */
 
 function getDocumentSize(){
@@ -1139,11 +1208,11 @@ function getDocumentSize(){
   return {
 
     width:
-      documentLayer.offsetWidth*
+      zoomDocument.offsetWidth*
       zoom,
 
     height:
-      documentLayer.offsetHeight*
+      zoomDocument.offsetHeight*
       zoom
 
   };
@@ -1157,27 +1226,24 @@ function getDocumentSize(){
 
 function limitPan(){
 
-  const vw =
+  const vw=
     viewport.clientWidth;
 
-
-  const vh =
+  const vh=
     viewport.clientHeight;
 
 
-  const size =
+  const size=
     getDocumentSize();
 
 
   /*
-   * HORIZONTAL
+   * X
    */
 
-  if(
-    size.width<=vw
-  ){
+  if(size.width<=vw){
 
-    panX=
+    offsetX=
       (vw-size.width)/2;
 
   }else{
@@ -1186,12 +1252,12 @@ function limitPan(){
       vw-size.width;
 
 
-    panX=
+    offsetX=
       Math.min(
         0,
         Math.max(
           minX,
-          panX
+          offsetX
         )
       );
 
@@ -1199,14 +1265,12 @@ function limitPan(){
 
 
   /*
-   * VERTICAL
+   * Y
    */
 
-  if(
-    size.height<=vh
-  ){
+  if(size.height<=vh){
 
-    panY=
+    offsetY=
       (vh-size.height)/2;
 
   }else{
@@ -1215,12 +1279,12 @@ function limitPan(){
       vh-size.height;
 
 
-    panY=
+    offsetY=
       Math.min(
         0,
         Math.max(
           minY,
-          panY
+          offsetY
         )
       );
 
@@ -1230,39 +1294,25 @@ function limitPan(){
 
 
 /* =====================================================
-   APPLY
+   APPLY ZOOM
    ===================================================== */
 
-function apply(){
+function applyZoom(){
 
   if(zoom<=1){
-
-    document.body.classList.remove(
-      "zoom-mode"
-    );
-
-
-    documentLayer.style.transform=
-      "none";
-
 
     return;
 
   }
 
 
-  document.body.classList.add(
-    "zoom-mode"
-  );
-
-
   limitPan();
 
 
-  documentLayer.style.transform=
+  zoomDocument.style.transform=
     "translate3d("+
-    panX+"px,"+
-    panY+"px,0) "+
+    offsetX+"px,"+
+    offsetY+"px,0) "+
     "scale("+zoom+")";
 
 
@@ -1275,7 +1325,7 @@ function apply(){
    ZOOM AROUND POINT
    ===================================================== */
 
-function zoomAround(
+function zoomAt(
   newZoom,
   x,
   y
@@ -1285,7 +1335,89 @@ function zoomAround(
     zoom;
 
 
-  newZoom=
+  /*
+   * Saat pertama masuk zoom,
+   * posisi PDF harus mengikuti posisi
+   * scroll halaman sekarang.
+   */
+
+  if(oldZoom<=1){
+
+    const pos=
+      getReadingPosition();
+
+
+    savedScrollY=
+      pos.scrollY;
+
+
+    savedScrollX=
+      pos.scrollX;
+
+
+    /*
+     * Koordinat PDF absolut.
+     */
+
+    const pdfY=
+      pos.scrollY;
+
+
+    const pdfX=0;
+
+
+    zoom=
+      Math.max(
+        1,
+        Math.min(
+          3,
+          newZoom
+        )
+      );
+
+
+    /*
+     * Tempatkan PDF sehingga
+     * posisi yang sedang dibaca
+     * tetap terlihat.
+     */
+
+    offsetX=
+      x-pdfX*zoom;
+
+
+    offsetY=
+      y-pdfY*zoom;
+
+
+    document.body.classList.add(
+      "zooming"
+    );
+
+
+    applyZoom();
+
+
+    return;
+
+  }
+
+
+  /*
+   * Titik PDF di bawah jari.
+   */
+
+  const pdfX=
+    (x-offsetX)/
+    oldZoom;
+
+
+  const pdfY=
+    (y-offsetY)/
+    oldZoom;
+
+
+  zoom=
     Math.max(
       1,
       Math.min(
@@ -1296,55 +1428,18 @@ function zoomAround(
 
 
   /*
-   * Kalau baru mulai zoom,
-   * simpan posisi browser.
-   */
-
-  if(oldZoom<=1){
-
-    rememberReadingPosition();
-
-
-    panX=0;
-
-    panY=0;
-
-  }
-
-
-  /*
-   * Titik dokumen yang berada
-   * di bawah jari/mouse.
-   */
-
-  const contentX=
-    (x-panX)/
-    oldZoom;
-
-
-  const contentY=
-    (y-panY)/
-    oldZoom;
-
-
-  zoom=newZoom;
-
-
-  /*
    * Pertahankan titik tersebut.
    */
 
-  panX=
-    x-
-    contentX*zoom;
+  offsetX=
+    x-pdfX*zoom;
 
 
-  panY=
-    y-
-    contentY*zoom;
+  offsetY=
+    y-pdfY*zoom;
 
 
-  apply();
+  applyZoom();
 
 }
 
@@ -1363,8 +1458,10 @@ function zoomIn(){
     viewport.clientHeight/2;
 
 
-  zoomAround(
-    zoom+0.2,
+  zoomAt(
+    zoom<=1
+      ? 1.2
+      : zoom+0.2,
     x,
     y
   );
@@ -1418,7 +1515,7 @@ function zoomOut(){
   }
 
 
-  zoomAround(
+  zoomAt(
     newZoom,
     x,
     y
@@ -1435,7 +1532,7 @@ function zoomOut(){
 
 
 /* =====================================================
-   DARK MODE
+   DARK
    ===================================================== */
 
 function toggleDark(){
@@ -1463,19 +1560,19 @@ function toggleThumbs(){
 
 
 /* =====================================================
-   GO TO PAGE
+   GO PAGE
    ===================================================== */
 
 function goToPage(pageNumber){
 
-  const canvases =
-    documentLayer.querySelectorAll(
+  const pages=
+    normalDocument.querySelectorAll(
       "canvas"
     );
 
 
-  const page =
-    canvases[pageNumber-1];
+  const page=
+    pages[pageNumber-1];
 
 
   if(!page){
@@ -1484,11 +1581,6 @@ function goToPage(pageNumber){
 
   }
 
-
-  /*
-   * Kalau normal,
-   * pakai scroll browser.
-   */
 
   if(zoom<=1){
 
@@ -1507,15 +1599,15 @@ function goToPage(pageNumber){
 
 
   /*
-   * Kalau zoom,
-   * pindahkan pan vertikal.
+   * Saat zoom, pindahkan PDF
+   * ke halaman tersebut.
    */
 
-  panY=
+  offsetY=
     -page.offsetTop*zoom;
 
 
-  apply();
+  applyZoom();
 
 }
 
@@ -1526,53 +1618,28 @@ function goToPage(pageNumber){
 
 function saveBookmark(){
 
-  if(zoom<=1){
-
-    localStorage.setItem(
-
-      "bm_"+comic,
-
-      JSON.stringify({
-
-        scrollY:
-          window.scrollY,
-
-        page:
-          getCurrentPage().page,
-
-        offset:
-          getCurrentPage().offset
-
-      })
-
-    );
+  const pos=
+    getReadingPosition();
 
 
-  }else{
+  localStorage.setItem(
 
-    localStorage.setItem(
+    "bm_"+comic,
 
-      "bm_"+comic,
+    JSON.stringify({
 
-      JSON.stringify({
+      scrollY:
+        pos.scrollY,
 
-        zoom:zoom,
+      page:
+        pos.page,
 
-        panX:panX,
+      offset:
+        pos.offset
 
-        panY:panY,
+    })
 
-        page:savedPage,
-
-        offset:savedPageOffset,
-
-        scrollY:savedScrollY
-
-      })
-
-    );
-
-  }
+  );
 
 
   show(
@@ -1611,10 +1678,6 @@ function goFull(){
 
 function updateProgress(){
 
-  /*
-   * NORMAL
-   */
-
   if(zoom<=1){
 
     const doc=
@@ -1643,15 +1706,11 @@ function updateProgress(){
   }
 
 
-  /*
-   * ZOOM
-   */
-
   const size=
     getDocumentSize();
 
 
-  const maxY=
+  const max=
     Math.max(
       0,
       size.height-
@@ -1663,16 +1722,16 @@ function updateProgress(){
     Math.max(
       0,
       Math.min(
-        maxY,
-        -panY
+        max,
+        -offsetY
       )
     );
 
 
   const percent=
-    maxY>0
-    ? current/maxY*100
-    : 0;
+    max>0
+      ? current/max*100
+      : 0;
 
 
   document
@@ -1708,15 +1767,13 @@ window.addEventListener(
    TOUCH DISTANCE
    ===================================================== */
 
-function getDistance(a,b){
+function distance(a,b){
 
   return Math.hypot(
 
-    a.clientX-
-    b.clientX,
+    a.clientX-b.clientX,
 
-    a.clientY-
-    b.clientY
+    a.clientY-b.clientY
 
   );
 
@@ -1727,7 +1784,7 @@ function getDistance(a,b){
    TOUCH CENTER
    ===================================================== */
 
-function getCenter(a,b){
+function center(a,b){
 
   return {
 
@@ -1757,9 +1814,7 @@ viewport.addEventListener(
   function(e){
 
     /*
-     * ----------------------------------------------
-     * DUA JARI = PINCH
-     * ----------------------------------------------
+     * TWO FINGER
      */
 
     if(
@@ -1767,31 +1822,83 @@ viewport.addEventListener(
     ){
 
       /*
-       * Kalau mulai pinch dari 100%,
-       * simpan posisi halaman dulu.
+       * Kalau dari 100%,
+       * langsung masuk zoom mode.
        */
 
       if(zoom<=1){
 
-        rememberReadingPosition();
+        const pos=
+          getReadingPosition();
+
+
+        savedScrollY=
+          pos.scrollY;
+
+
+        savedScrollX=
+          pos.scrollX;
+
+
+        /*
+         * Mulai dari zoom 1.
+         */
+
+        zoom=1;
+
+        offsetX=0;
+
+        offsetY=0;
+
+        document.body.classList.add(
+          "zooming"
+        );
 
       }
 
 
-      isPinching=true;
+      pinch=true;
 
-      isPanning=false;
+      pan=false;
 
 
-      pinchStartDistance=
-        getDistance(
+      pinchDistance=
+        distance(
           e.touches[0],
           e.touches[1]
         );
 
 
-      pinchStartZoom=
+      pinchZoom=
         zoom;
+
+
+      const c=
+        center(
+          e.touches[0],
+          e.touches[1]
+        );
+
+
+      /*
+       * Simpan titik PDF di bawah
+       * titik tengah dua jari.
+       */
+
+      pinchPdfX=
+        (c.x-offsetX)/
+        Math.max(
+          zoom,
+          0.0001
+        );
+
+
+      pinchPdfY=
+        (c.y-offsetY)/
+        Math.max(
+          zoom,
+          0.0001
+        );
 
 
       lastTap=0;
@@ -1803,9 +1910,7 @@ viewport.addEventListener(
 
 
     /*
-     * ----------------------------------------------
-     * SATU JARI SAAT ZOOM
-     * ----------------------------------------------
+     * ONE FINGER AT ZOOM
      */
 
     if(
@@ -1813,8 +1918,7 @@ viewport.addEventListener(
       zoom>1
     ){
 
-      isPanning=true;
-
+      pan=true;
 
       panStartX=
         e.touches[0].clientX;
@@ -1824,12 +1928,12 @@ viewport.addEventListener(
         e.touches[0].clientY;
 
 
-      panOriginX=
-        panX;
+      panStartOffsetX=
+        offsetX;
 
 
-      panOriginY=
-        panY;
+      panStartOffsetY=
+        offsetY;
 
 
       lastTap=0;
@@ -1852,28 +1956,26 @@ viewport.addEventListener(
   function(e){
 
     /*
-     * ==============================================
      * PINCH
-     * ==============================================
      */
 
     if(
-      isPinching &&
+      pinch &&
       e.touches.length===2
     ){
 
       e.preventDefault();
 
 
-      const currentDistance=
-        getDistance(
+      const d=
+        distance(
           e.touches[0],
           e.touches[1]
         );
 
 
       if(
-        pinchStartDistance<=0
+        pinchDistance<=0
       ){
 
         return;
@@ -1881,21 +1983,19 @@ viewport.addEventListener(
       }
 
 
-      const center=
-        getCenter(
+      const c=
+        center(
           e.touches[0],
           e.touches[1]
         );
 
 
-      const factor=
-        currentDistance/
-        pinchStartDistance;
-
-
       let newZoom=
-        pinchStartZoom*
-        factor;
+        pinchZoom*
+        (
+          d/
+          pinchDistance
+        );
 
 
       newZoom=
@@ -1908,16 +2008,26 @@ viewport.addEventListener(
         );
 
 
+      zoom=
+        newZoom;
+
+
       /*
-       * Kalau mulai dari 100%,
-       * gunakan titik tengah jari.
+       * Titik PDF tetap di bawah
+       * titik tengah jari.
        */
 
-      zoomAround(
-        newZoom,
-        center.x,
-        center.y
-      );
+      offsetX=
+        c.x-
+        pinchPdfX*zoom;
+
+
+      offsetY=
+        c.y-
+        pinchPdfY*zoom;
+
+
+      applyZoom();
 
 
       return;
@@ -1926,13 +2036,11 @@ viewport.addEventListener(
 
 
     /*
-     * ==============================================
      * PAN
-     * ==============================================
      */
 
     if(
-      isPanning &&
+      pan &&
       e.touches.length===1 &&
       zoom>1
     ){
@@ -1950,17 +2058,17 @@ viewport.addEventListener(
         panStartY;
 
 
-      panX=
-        panOriginX+
+      offsetX=
+        panStartOffsetX+
         dx;
 
 
-      panY=
-        panOriginY+
+      offsetY=
+        panStartOffsetY+
         dy;
 
 
-      apply();
+      applyZoom();
 
     }
 
@@ -1980,29 +2088,25 @@ viewport.addEventListener(
   function(e){
 
     /*
-     * ==============================================
      * PINCH
-     * ==============================================
      */
 
-    if(isPinching){
+    if(pinch){
 
       if(
         e.touches.length<2
       ){
 
-        isPinching=false;
+        pinch=false;
 
-        pinchStartDistance=0;
+        pinchDistance=0;
 
 
-        /*
-         * Jangan reset zoom.
-         */
+        if(zoom<=1){
 
-        if(zoom>1){
+          exitZoom();
 
-          enterZoom();
+        }else{
 
           show(
             Math.round(
@@ -2021,14 +2125,12 @@ viewport.addEventListener(
 
 
     /*
-     * ==============================================
      * PAN
-     * ==============================================
      */
 
-    if(isPanning){
+    if(pan){
 
-      isPanning=false;
+      pan=false;
 
       return;
 
@@ -2036,9 +2138,7 @@ viewport.addEventListener(
 
 
     /*
-     * ==============================================
      * DOUBLE TAP
-     * ==============================================
      */
 
     if(
@@ -2060,7 +2160,7 @@ viewport.addEventListener(
       now-lastTap<300
     ){
 
-      const touch=
+      const t=
         e.changedTouches[0];
 
 
@@ -2069,18 +2169,18 @@ viewport.addEventListener(
 
 
       const x=
-        touch.clientX-
+        t.clientX-
         rect.left;
 
 
       const y=
-        touch.clientY-
+        t.clientY-
         rect.top;
 
 
       if(zoom<=1){
 
-        zoomAround(
+        zoomAt(
           2,
           x,
           y
@@ -2096,7 +2196,6 @@ viewport.addEventListener(
 
       lastTap=0;
 
-
     }else{
 
       lastTap=now;
@@ -2111,21 +2210,17 @@ viewport.addEventListener(
 
 
 /* =====================================================
-   MOUSE DRAG DESKTOP
+   MOUSE DRAG
    ===================================================== */
 
 viewport.addEventListener(
   "mousedown",
   function(e){
 
-    if(zoom<=1){
-
-      return;
-
-    }
-
-
-    if(e.button!==0){
+    if(
+      zoom<=1 ||
+      e.button!==0
+    ){
 
       return;
 
@@ -2143,12 +2238,12 @@ viewport.addEventListener(
       e.clientY;
 
 
-    mouseOriginX=
-      panX;
+    mouseStartOffsetX=
+      offsetX;
 
 
-    mouseOriginY=
-      panY;
+    mouseStartOffsetY=
+      offsetY;
 
 
     viewport.style.cursor=
@@ -2172,23 +2267,23 @@ window.addEventListener(
     }
 
 
-    panX=
-      mouseOriginX+
+    offsetX=
+      mouseStartOffsetX+
       (
         e.clientX-
         mouseStartX
       );
 
 
-    panY=
-      mouseOriginY+
+    offsetY=
+      mouseStartOffsetY+
       (
         e.clientY-
         mouseStartY
       );
 
 
-    apply();
+    applyZoom();
 
   }
 );
@@ -2212,7 +2307,7 @@ window.addEventListener(
 
 
 /* =====================================================
-   CTRL + MOUSE WHEEL ZOOM
+   CTRL + WHEEL ZOOM
    ===================================================== */
 
 viewport.addEventListener(
@@ -2245,8 +2340,8 @@ viewport.addEventListener(
 
     const amount=
       e.deltaY<0
-      ? 0.1
-      : -0.1;
+      ? .1
+      : -.1;
 
 
     const newZoom=
@@ -2262,7 +2357,7 @@ viewport.addEventListener(
     }
 
 
-    zoomAround(
+    zoomAt(
       newZoom,
       x,
       y
@@ -2273,7 +2368,6 @@ viewport.addEventListener(
       Math.round(
         zoom*100
       )+"%"
-
     );
 
   },
@@ -2284,7 +2378,7 @@ viewport.addEventListener(
 
 
 /* =====================================================
-   KEYBOARD PAN
+   KEYBOARD
    ===================================================== */
 
 document.addEventListener(
@@ -2300,9 +2394,9 @@ document.addEventListener(
         e.key==="ArrowLeft"
       ){
 
-        panX+=amount;
+        offsetX+=amount;
 
-        apply();
+        applyZoom();
 
         e.preventDefault();
 
@@ -2313,9 +2407,9 @@ document.addEventListener(
         e.key==="ArrowRight"
       ){
 
-        panX-=amount;
+        offsetX-=amount;
 
-        apply();
+        applyZoom();
 
         e.preventDefault();
 
@@ -2326,9 +2420,9 @@ document.addEventListener(
         e.key==="ArrowUp"
       ){
 
-        panY+=amount;
+        offsetY+=amount;
 
-        apply();
+        applyZoom();
 
         e.preventDefault();
 
@@ -2339,9 +2433,9 @@ document.addEventListener(
         e.key==="ArrowDown"
       ){
 
-        panY-=amount;
+        offsetY-=amount;
 
-        apply();
+        applyZoom();
 
         e.preventDefault();
 
@@ -2349,10 +2443,6 @@ document.addEventListener(
 
     }
 
-
-    /*
-     * Disable Ctrl+P / Ctrl+S.
-     */
 
     if(
       (e.ctrlKey||e.metaKey) &&
@@ -2370,7 +2460,31 @@ document.addEventListener(
 
 
 /* =====================================================
-   CONTEXT MENU
+   RESIZE
+   ===================================================== */
+
+window.addEventListener(
+  "resize",
+  function(){
+
+    if(zoom>1){
+
+      limitPan();
+
+      applyZoom();
+
+    }else{
+
+      updateProgress();
+
+    }
+
+  }
+);
+
+
+/* =====================================================
+   DISABLE CONTEXT MENU
    ===================================================== */
 
 document.addEventListener(
@@ -2384,7 +2498,7 @@ document.addEventListener(
 
 
 /* =====================================================
-   DRAG
+   DISABLE DRAG
    ===================================================== */
 
 document.addEventListener(
@@ -2392,26 +2506,6 @@ document.addEventListener(
   function(e){
 
     e.preventDefault();
-
-  }
-);
-
-
-/* =====================================================
-   RESIZE
-   ===================================================== */
-
-window.addEventListener(
-  "resize",
-  function(){
-
-    if(zoom>1){
-
-      limitPan();
-
-      apply();
-
-    }
 
   }
 );
