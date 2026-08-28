@@ -35,10 +35,16 @@ body{
   color:#fff;
   font-family:Arial,sans-serif;
 
+  /*
+   * Bisa scroll vertikal DAN horizontal.
+   */
   overflow-x:auto;
   overflow-y:auto;
 
   -webkit-overflow-scrolling:touch;
+
+  overscroll-behavior-x:auto;
+  overscroll-behavior-y:auto;
 }
 
 
@@ -48,6 +54,7 @@ body{
 
 #top{
   position:fixed;
+
   top:0;
   left:0;
   right:0;
@@ -57,10 +64,12 @@ body{
   background:#111;
 
   display:flex;
+
   justify-content:flex-end;
   align-items:center;
 
   gap:8px;
+
   padding:8px 12px;
 
   z-index:1000;
@@ -89,7 +98,7 @@ body{
 
 
 /* ==========================================
-   PROGRESS
+   PROGRESS BAR
    ========================================== */
 
 #progress{
@@ -116,42 +125,53 @@ body{
 
 
 /* ==========================================
-   PDF VIEWER
+   VIEWER
    ========================================== */
 
 #viewer{
+
+  /*
+   * Jangan dibatasi lebar viewport ketika
+   * sedang zoom.
+   */
+
   width:100%;
+
   max-width:780px;
 
   margin:59px auto 0;
 
   /*
-   * PENTING:
-   * Jangan menggunakan transform:scale().
-   * Kita menggunakan CSS zoom agar ukuran
-   * layout ikut membesar dan scroll tetap jalan.
+   * Zoom menggunakan CSS zoom.
+   * Layout ikut membesar sehingga area
+   * scroll ikut membesar.
    */
 
   zoom:1;
+
+  /*
+   * PENTING:
+   * Izinkan geser X DAN Y.
+   */
+
+  touch-action:pan-x pan-y;
+
+  position:relative;
 
   transform:none;
 
   transform-origin:top left;
 
-  /*
-   * Satu jari tetap bisa scroll.
-   */
-  touch-action:pan-y;
-
-  position:relative;
+  will-change:zoom;
 }
 
 
 /* ==========================================
-   PDF CANVAS
+   CANVAS
    ========================================== */
 
 canvas{
+
   display:block;
 
   width:100%;
@@ -162,10 +182,11 @@ canvas{
   margin-bottom:2px;
 
   /*
-   * Biarkan browser menangani scroll
-   * satu jari.
+   * Izinkan browser melakukan scroll
+   * ke segala arah ketika gambar diperbesar.
    */
-  touch-action:pan-y;
+
+  touch-action:pan-x pan-y;
 
   -webkit-user-select:none;
   user-select:none;
@@ -173,8 +194,10 @@ canvas{
   -webkit-touch-callout:none;
 
   /*
-   * Jangan gunakan transform pada canvas.
+   * Jangan gunakan transform di canvas.
    */
+
+  transform:none;
 }
 
 
@@ -192,6 +215,7 @@ canvas{
    ========================================== */
 
 #thumbs{
+
   position:fixed;
 
   right:-140px;
@@ -224,6 +248,7 @@ canvas{
 
 
 .thumb{
+
   width:100%;
 
   display:block;
@@ -237,6 +262,7 @@ canvas{
   cursor:pointer;
 
   touch-action:manipulation;
+
 }
 
 
@@ -245,6 +271,7 @@ canvas{
    ========================================== */
 
 #thumbBtn{
+
   position:fixed;
 
   right:14px;
@@ -278,6 +305,7 @@ canvas{
    ========================================== */
 
 #toast{
+
   position:fixed;
 
   left:50%;
@@ -308,19 +336,23 @@ canvas{
 @media(max-width:600px){
 
   #top{
+
     height:52px;
 
     padding:6px 8px;
 
     gap:6px;
+
   }
 
 
   .btn{
+
     width:38px;
     height:38px;
 
     font-size:17px;
+
   }
 
 
@@ -330,6 +362,7 @@ canvas{
 
 
   #viewer{
+
     margin-top:55px;
 
     max-width:none;
@@ -337,6 +370,7 @@ canvas{
     width:100%;
 
     zoom:1;
+
   }
 
 }
@@ -349,18 +383,22 @@ canvas{
 @media(max-width:380px){
 
   #top{
+
     gap:4px;
 
     padding-left:5px;
     padding-right:5px;
+
   }
 
 
   .btn{
+
     width:36px;
     height:36px;
 
     font-size:16px;
+
   }
 
 }
@@ -421,12 +459,14 @@ canvas{
      ======================================== -->
 
 <div id="progress">
+
   <div id="bar"></div>
+
 </div>
 
 
 <!-- ========================================
-     PDF
+     PDF VIEWER
      ======================================== -->
 
 <div id="viewer"></div>
@@ -442,9 +482,15 @@ canvas{
 <button id="thumbBtn"
         onclick="toggleThumbs()"
         aria-label="Thumbnails">
+
   ☰
+
 </button>
 
+
+<!-- ========================================
+     TOAST
+     ======================================== -->
 
 <div id="toast"></div>
 
@@ -465,7 +511,7 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 
 
 /* ==========================================
-   NAMA PDF
+   PDF NAME
    ========================================== */
 
 const comic =
@@ -490,7 +536,7 @@ document.getElementById("thumbs");
 
 
 /* ==========================================
-   RENDER HALAMAN
+   RENDER PAGES
    ========================================== */
 
 for(let i=1;i<=pdf.numPages;i++){
@@ -578,8 +624,11 @@ for(let i=1;i<=pdf.numPages;i++){
   thumb.onclick=()=>{
 
     canvas.scrollIntoView({
+
       behavior:"smooth",
+
       block:"start"
+
     });
 
 
@@ -594,22 +643,22 @@ for(let i=1;i<=pdf.numPages;i++){
 
 
 /* ==========================================
-   BOOKMARK
+   LOAD BOOKMARK
    ========================================== */
 
-const saved =
+const savedPosition =
 localStorage.getItem(
   "bm_"+comic
 );
 
 
-if(saved){
+if(savedPosition){
 
   setTimeout(()=>{
 
     window.scrollTo(
       0,
-      Number(saved)
+      Number(savedPosition)
     );
 
   },100);
@@ -621,7 +670,7 @@ if(saved){
 
 
 <!-- ========================================
-     CONTROLS
+     CONTROL SCRIPT
      ======================================== -->
 
 <script>
@@ -674,29 +723,25 @@ function show(text){
 function apply(){
 
   /*
-   * CSS ZOOM.
-   *
-   * Berbeda dengan transform:scale(),
-   * CSS zoom membuat ukuran layout ikut
-   * membesar sehingga scrollHeight browser
-   * ikut bertambah.
+   * CSS zoom membuat ukuran layout
+   * benar-benar bertambah.
    */
 
   viewer.style.zoom=zoom;
 
 
   /*
-   * Pastikan browser menghitung ulang
-   * layout setelah zoom.
+   * Beri sedikit waktu browser menghitung
+   * ulang ukuran dokumen.
    */
 
-  document.body.style.minHeight =
-    "auto";
+  requestAnimationFrame(()=>{
 
+    window.dispatchEvent(
+      new Event("resize")
+    );
 
-  window.dispatchEvent(
-    new Event("resize")
-  );
+  });
 
 }
 
@@ -711,8 +756,8 @@ function zoomIn(){
     Math.min(
       3,
       Math.round(
-        (zoom+0.2)*10
-      )/10
+        (zoom+0.2)*100
+      )/100
     );
 
 
@@ -736,8 +781,8 @@ function zoomOut(){
     Math.max(
       0.5,
       Math.round(
-        (zoom-0.2)*10
-      )/10
+        (zoom-0.2)*100
+      )/100
     );
 
 
@@ -835,14 +880,24 @@ window.addEventListener(
       document.documentElement;
 
 
-    const max =
+    const maxY =
       doc.scrollHeight -
       doc.clientHeight;
 
 
+    const maxX =
+      doc.scrollWidth -
+      doc.clientWidth;
+
+
+    /*
+     * Progress utama mengikuti
+     * posisi vertikal.
+     */
+
     const percent =
-      max>0
-      ? (doc.scrollTop/max)*100
+      maxY>0
+      ? (doc.scrollTop/maxY)*100
       : 0;
 
 
@@ -858,7 +913,6 @@ window.addEventListener(
 );
 
 
-
 /* ==========================================
    PINCH ZOOM
    ========================================== */
@@ -868,12 +922,6 @@ let pinchStart=0;
 let pinchBase=1;
 
 let isPinching=false;
-
-
-/*
- * Ini untuk mencegah pinch dianggap
- * sebagai double tap.
- */
 
 let wasPinching=false;
 
@@ -921,7 +969,7 @@ document.addEventListener(
 
 
       /*
-       * Jangan anggap sebagai double tap.
+       * Matikan double tap sementara.
        */
 
       lastTap=0;
@@ -965,7 +1013,7 @@ document.addEventListener(
 
 
       /*
-       * Batasi 50% - 300%.
+       * Batas zoom 50% - 300%.
        */
 
       newZoom =
@@ -977,12 +1025,6 @@ document.addEventListener(
           )
         );
 
-
-      /*
-       * Sedikit pembulatan supaya
-       * zoom tidak menghasilkan angka
-       * terlalu panjang.
-       */
 
       zoom =
         Math.round(
@@ -1010,8 +1052,8 @@ document.addEventListener(
   function(e){
 
     /*
-     * Kalau sedang pinch,
-     * JANGAN reset zoom.
+     * Kalau pinch selesai,
+     * zoom JANGAN dikembalikan.
      */
 
     if(isPinching){
@@ -1022,10 +1064,6 @@ document.addEventListener(
 
         pinchStart=0;
 
-
-        /*
-         * Zoom tetap.
-         */
 
         show(
           Math.round(
@@ -1042,8 +1080,8 @@ document.addEventListener(
 
 
     /*
-     * Hanya single finger yang boleh
-     * diproses sebagai double tap.
+     * Hanya satu jari yang boleh
+     * menjadi double tap.
      */
 
     if(
@@ -1066,7 +1104,7 @@ document.addEventListener(
     ){
 
       /*
-       * DOUBLE TAP
+       * Double tap:
        *
        * 100% -> 200%
        * 200% -> 100%
@@ -1125,7 +1163,7 @@ document.addEventListener(
 
 
 /* ==========================================
-   DRAG
+   DRAG PROTECTION
    ========================================== */
 
 document.addEventListener(
