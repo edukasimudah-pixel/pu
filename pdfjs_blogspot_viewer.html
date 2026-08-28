@@ -14,9 +14,9 @@
 
 <style>
 
-/* ==================================================
+/* =====================================================
    RESET
-   ================================================== */
+   ===================================================== */
 
 *{
   margin:0;
@@ -41,9 +41,9 @@ body{
 }
 
 
-/* ==================================================
+/* =====================================================
    TOOLBAR
-   ================================================== */
+   ===================================================== */
 
 #top{
   position:fixed;
@@ -71,7 +71,7 @@ body{
   width:40px;
   height:40px;
 
-  border:0;
+  border:none;
   border-radius:8px;
 
   background:#2563EB;
@@ -88,9 +88,9 @@ body{
 }
 
 
-/* ==================================================
-   PROGRESS BAR
-   ================================================== */
+/* =====================================================
+   PROGRESS
+   ===================================================== */
 
 #progress{
   position:fixed;
@@ -114,54 +114,56 @@ body{
 }
 
 
-/* ==================================================
-   NORMAL MODE
-   ================================================== */
-
-/*
-   Pada 100%:
-   browser menangani scroll normal.
-*/
+/* =====================================================
+   NORMAL VIEWPORT
+   ===================================================== */
 
 #viewport{
+
   position:relative;
 
   width:100%;
 
-  min-height:calc(100vh - 59px);
-
   margin-top:59px;
+
+  min-height:calc(100vh - 59px);
 
   overflow:visible;
 
   background:#0b0b0b;
 
+  /*
+   * PENTING:
+   * Pada 100% browser boleh scroll.
+   */
+
   touch-action:pan-y;
 }
 
 
-/* ==================================================
-   DOCUMENT NORMAL
-   ================================================== */
+/* =====================================================
+   DOCUMENT
+   ===================================================== */
 
 #document{
 
   position:relative;
 
   width:100%;
-
   max-width:780px;
 
   margin:0 auto;
 
   transform:none;
 
+  transform-origin:top left;
+
 }
 
 
-/* ==================================================
+/* =====================================================
    CANVAS
-   ================================================== */
+   ===================================================== */
 
 #document canvas{
 
@@ -176,21 +178,16 @@ body{
 
   pointer-events:none;
 
-  -webkit-user-select:none;
   user-select:none;
+  -webkit-user-select:none;
 
   -webkit-touch-callout:none;
 }
 
 
-/* ==================================================
+/* =====================================================
    ZOOM MODE
-   ================================================== */
-
-/*
-   Ketika zoom:
-   viewport berubah menjadi jendela tetap.
-*/
+   ===================================================== */
 
 body.zoom-mode{
   overflow:hidden;
@@ -211,18 +208,18 @@ body.zoom-mode #viewport{
 
   margin:0;
 
+  min-height:0;
+
   overflow:hidden;
+
+  /*
+   * Gesture kita yang tangani.
+   */
 
   touch-action:none;
 
-  z-index:10;
-
 }
 
-
-/*
-   Document pada mode zoom.
-*/
 
 body.zoom-mode #document{
 
@@ -232,7 +229,6 @@ body.zoom-mode #document{
   left:0;
 
   width:780px;
-
   max-width:none;
 
   margin:0;
@@ -244,18 +240,18 @@ body.zoom-mode #document{
 }
 
 
-/* ==================================================
+/* =====================================================
    DARK MODE
-   ================================================== */
+   ===================================================== */
 
 .dark #document canvas{
   filter:invert(1) hue-rotate(180deg);
 }
 
 
-/* ==================================================
+/* =====================================================
    THUMBNAILS
-   ================================================== */
+   ===================================================== */
 
 #thumbs{
 
@@ -309,9 +305,9 @@ body.zoom-mode #document{
 }
 
 
-/* ==================================================
+/* =====================================================
    THUMB BUTTON
-   ================================================== */
+   ===================================================== */
 
 #thumbBtn{
 
@@ -323,7 +319,7 @@ body.zoom-mode #document{
   width:52px;
   height:52px;
 
-  border:0;
+  border:none;
   border-radius:50%;
 
   background:#2563EB;
@@ -338,13 +334,12 @@ body.zoom-mode #document{
 
   touch-action:manipulation;
 
-  -webkit-tap-highlight-color:transparent;
 }
 
 
-/* ==================================================
+/* =====================================================
    TOAST
-   ================================================== */
+   ===================================================== */
 
 #toast{
 
@@ -368,12 +363,13 @@ body.zoom-mode #document{
   z-index:10003;
 
   white-space:nowrap;
+
 }
 
 
-/* ==================================================
+/* =====================================================
    MOBILE
-   ================================================== */
+   ===================================================== */
 
 @media(max-width:600px){
 
@@ -401,19 +397,25 @@ body.zoom-mode #document{
   }
 
   #viewport{
+
     margin-top:55px;
+
+    min-height:calc(100vh - 55px);
+
   }
 
   body.zoom-mode #viewport{
+
     top:55px;
+
   }
 
 }
 
 
-/* ==================================================
+/* =====================================================
    SMALL PHONE
-   ================================================== */
+   ===================================================== */
 
 @media(max-width:380px){
 
@@ -445,9 +447,9 @@ body.zoom-mode #document{
 <body>
 
 
-<!-- ==================================================
+<!-- =====================================================
      TOOLBAR
-     ================================================== -->
+     ===================================================== -->
 
 <div id="top">
 
@@ -479,20 +481,18 @@ body.zoom-mode #document{
 </div>
 
 
-<!-- ==================================================
+<!-- =====================================================
      PROGRESS
-     ================================================== -->
+     ===================================================== -->
 
 <div id="progress">
-
   <div id="bar"></div>
-
 </div>
 
 
-<!-- ==================================================
+<!-- =====================================================
      VIEWPORT
-     ================================================== -->
+     ===================================================== -->
 
 <div id="viewport">
 
@@ -501,18 +501,16 @@ body.zoom-mode #document{
 </div>
 
 
-<!-- ==================================================
+<!-- =====================================================
      THUMBNAILS
-     ================================================== -->
+     ===================================================== -->
 
 <div id="thumbs"></div>
 
 
 <button id="thumbBtn"
         onclick="toggleThumbs()">
-
   ☰
-
 </button>
 
 
@@ -520,9 +518,9 @@ body.zoom-mode #document{
 
 
 
-<!-- ==================================================
+<!-- =====================================================
      PDF.JS
-     ================================================== -->
+     ===================================================== -->
 
 <script type="module">
 
@@ -534,18 +532,18 @@ pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
 
-/* ==================================================
+/* =====================================================
    PDF NAME
-   ================================================== */
+   ===================================================== */
 
 const comic =
 new URLSearchParams(location.search).get("comic")
 || "Dwikora.pdf";
 
 
-/* ==================================================
+/* =====================================================
    ELEMENT
-   ================================================== */
+   ===================================================== */
 
 const documentLayer =
 document.getElementById("document");
@@ -554,17 +552,17 @@ const thumbs =
 document.getElementById("thumbs");
 
 
-/* ==================================================
+/* =====================================================
    LOAD PDF
-   ================================================== */
+   ===================================================== */
 
 const pdf =
 await pdfjsLib.getDocument(comic).promise;
 
 
-/* ==================================================
+/* =====================================================
    RENDER PDF
-   ================================================== */
+   ===================================================== */
 
 for(
   let i=1;
@@ -576,9 +574,9 @@ for(
   await pdf.getPage(i);
 
 
-  /* ==============================================
-     HALAMAN UTAMA
-     ============================================== */
+  /* =================================================
+     MAIN PAGE
+     ================================================= */
 
   const viewport =
   page.getViewport({
@@ -609,14 +607,21 @@ for(
   }).promise;
 
 
+  /*
+   * Simpan nomor halaman.
+   */
+
+  canvas.dataset.page=i;
+
+
   documentLayer.appendChild(
     canvas
   );
 
 
-  /* ==============================================
+  /* =================================================
      THUMBNAIL
-     ============================================== */
+     ================================================= */
 
   const thumbViewport =
   page.getViewport({
@@ -650,34 +655,12 @@ for(
   thumb.className="thumb";
 
 
+  thumb.dataset.page=i;
+
+
   thumb.onclick=()=>{
 
-    if(zoom>1){
-
-      /*
-       * Kalau sedang zoom,
-       * pindahkan pan ke halaman tersebut.
-       */
-
-      goToPage(i);
-
-    }else{
-
-      /*
-       * Normal:
-       * browser scroll biasa.
-       */
-
-      canvas.scrollIntoView({
-
-        behavior:"smooth",
-
-        block:"start"
-
-      });
-
-    }
-
+    goToPage(i);
 
     thumbs.classList.remove(
       "show"
@@ -693,9 +676,9 @@ for(
 }
 
 
-/* ==================================================
-   BOOKMARK
-   ================================================== */
+/* =====================================================
+   BOOKMARK LAMA
+   ===================================================== */
 
 const saved =
 localStorage.getItem(
@@ -708,15 +691,24 @@ if(saved){
   try{
 
     const data =
-      JSON.parse(saved);
+    JSON.parse(saved);
 
-
-    /*
-     * Kalau bookmark versi lama
-     * hanya angka.
-     */
 
     if(
+      data &&
+      typeof data.scrollY==="number"
+    ){
+
+      setTimeout(()=>{
+
+        window.scrollTo(
+          0,
+          data.scrollY
+        );
+
+      },200);
+
+    }else if(
       typeof data==="number"
     ){
 
@@ -732,10 +724,6 @@ if(saved){
     }
 
   }catch(e){
-
-    /*
-     * Bookmark lama berupa angka.
-     */
 
     setTimeout(()=>{
 
@@ -754,32 +742,47 @@ if(saved){
 
 
 
-<!-- ==================================================
+<!-- =====================================================
      READER ENGINE
-     ================================================== -->
+     ===================================================== -->
 
 <script>
 
-
-/* ==================================================
+/* =====================================================
    STATE
-   ================================================== */
+   ===================================================== */
 
 let zoom=1;
 
 
 /*
-   Posisi dokumen saat zoom.
-*/
+ * Posisi document saat zoom.
+ */
 
 let panX=0;
-
 let panY=0;
 
 
 /*
-   Touch state.
-*/
+ * Posisi browser sebelum masuk zoom.
+ */
+
+let savedScrollX=0;
+let savedScrollY=0;
+
+
+/*
+ * Posisi halaman yang sedang dibaca.
+ */
+
+let savedPage=1;
+
+let savedPageOffset=0;
+
+
+/*
+ * Touch state.
+ */
 
 let isPinching=false;
 
@@ -787,8 +790,8 @@ let isPanning=false;
 
 
 /*
-   Pinch state.
-*/
+ * Pinch.
+ */
 
 let pinchStartDistance=0;
 
@@ -796,8 +799,8 @@ let pinchStartZoom=1;
 
 
 /*
-   Posisi awal pan.
-*/
+ * Pan.
+ */
 
 let panStartX=0;
 
@@ -809,15 +812,15 @@ let panOriginY=0;
 
 
 /*
-   Double tap.
-*/
+ * Double tap.
+ */
 
 let lastTap=0;
 
 
 /*
-   Mouse.
-*/
+ * Mouse.
+ */
 
 let mouseDown=false;
 
@@ -830,9 +833,9 @@ let mouseOriginX=0;
 let mouseOriginY=0;
 
 
-/* ==================================================
+/* =====================================================
    ELEMENT
-   ================================================== */
+   ===================================================== */
 
 const viewport =
 document.getElementById(
@@ -850,9 +853,9 @@ document.getElementById(
 );
 
 
-/* ==================================================
+/* =====================================================
    TOAST
-   ================================================== */
+   ===================================================== */
 
 function show(text){
 
@@ -866,7 +869,7 @@ function show(text){
   );
 
 
-  window.toastTimer =
+  window.toastTimer=
   setTimeout(()=>{
 
     toast.style.display="none";
@@ -876,56 +879,173 @@ function show(text){
 }
 
 
-/* ==================================================
-   ENTER ZOOM MODE
-   ================================================== */
+/* =====================================================
+   GET CURRENT PAGE
+   ===================================================== */
 
-function enterZoomMode(){
+function getCurrentPage(){
+
+  const canvases =
+    documentLayer.querySelectorAll(
+      "canvas"
+    );
+
+
+  if(!canvases.length){
+
+    return {
+      page:1,
+      offset:0
+    };
+
+  }
+
+
+  const currentScroll =
+    window.scrollY;
+
+
+  let currentPage=1;
+
+  let bestDistance=Infinity;
+
+  let bestOffset=0;
+
+
+  canvases.forEach(
+    (canvas,index)=>{
+
+      const top =
+        canvas.offsetTop;
+
+
+      const distance =
+        Math.abs(
+          top-currentScroll
+        );
+
+
+      if(distance<bestDistance){
+
+        bestDistance=distance;
+
+        currentPage=index+1;
+
+        bestOffset=
+          currentScroll-top;
+
+      }
+
+    }
+  );
+
+
+  return {
+
+    page:currentPage,
+
+    offset:bestOffset
+
+  };
+
+}
+
+
+/* =====================================================
+   SAVE CURRENT READING POSITION
+   ===================================================== */
+
+function rememberReadingPosition(){
+
+  const current =
+    getCurrentPage();
+
+
+  savedPage=
+    current.page;
+
+
+  savedPageOffset=
+    current.offset;
+
+
+  savedScrollY=
+    window.scrollY ||
+    document.documentElement.scrollTop ||
+    0;
+
+
+  savedScrollX=
+    window.scrollX ||
+    document.documentElement.scrollLeft ||
+    0;
+
+}
+
+
+/* =====================================================
+   ENTER ZOOM
+   ===================================================== */
+
+function enterZoom(){
 
   if(zoom<=1){
+
     return;
+
   }
 
 
   /*
-   * Aktifkan mode zoom.
+   * Sudah zoom?
    */
+
+  if(
+    !document.body.classList.contains(
+      "zoom-mode"
+    )
+  ){
+
+    /*
+     * Simpan posisi browser.
+     */
+
+    rememberReadingPosition();
+
+  }
+
 
   document.body.classList.add(
     "zoom-mode"
   );
 
 
-  /*
-   * Pastikan posisi dokumen
-   * tidak loncat.
-   */
-
   apply();
 
 }
 
 
-/* ==================================================
-   EXIT ZOOM MODE
-   ================================================== */
+/* =====================================================
+   EXIT ZOOM
+   ===================================================== */
 
-function exitZoomMode(){
+function exitZoom(){
 
   /*
-   * Simpan posisi vertikal
-   * sebelum kembali ke browser scroll.
+   * Simpan halaman yang sedang
+   * dilihat sebelum keluar.
    */
 
-  const currentY =
-    Math.max(
-      0,
-      -panY
-    );
+  const currentPage =
+    savedPage;
+
+
+  const currentOffset =
+    savedPageOffset;
 
 
   /*
-   * Keluar dari mode custom.
+   * Matikan mode zoom.
    */
 
   document.body.classList.remove(
@@ -934,7 +1054,15 @@ function exitZoomMode(){
 
 
   /*
-   * Reset pan.
+   * Hapus transform.
+   */
+
+  documentLayer.style.transform=
+    "none";
+
+
+  /*
+   * Reset posisi custom.
    */
 
   panX=0;
@@ -943,51 +1071,79 @@ function exitZoomMode(){
 
 
   /*
-   * Kembali ke 100%.
+   * Kembali 100%.
    */
 
   zoom=1;
 
 
   /*
-   * Browser kembali aktif.
-   */
-
-  document.body.style.overflowY=
-    "auto";
-
-
-  /*
-   * Scroll ke posisi yang kira-kira
-   * sama dengan posisi sebelumnya.
+   * Tunggu browser mengembalikan
+   * layout normal.
    */
 
   requestAnimationFrame(()=>{
 
-    window.scrollTo(
-      0,
-      currentY
-    );
+    requestAnimationFrame(()=>{
+
+      const canvases =
+        documentLayer.querySelectorAll(
+          "canvas"
+        );
+
+
+      const page =
+        canvases[currentPage-1];
+
+
+      if(page){
+
+        const pageTop =
+          page.offsetTop;
+
+
+        window.scrollTo(
+
+          savedScrollX,
+
+          pageTop+
+          currentOffset
+
+        );
+
+      }else{
+
+        window.scrollTo(
+          savedScrollX,
+          savedScrollY
+        );
+
+      }
+
+
+      updateProgress();
+
+    });
 
   });
 
 }
 
 
-/* ==================================================
-   DOCUMENT SIZE
-   ================================================== */
+/* =====================================================
+   GET DOCUMENT SIZE
+   ===================================================== */
 
-function getSize(){
+function getDocumentSize(){
 
   return {
 
     width:
-      documentLayer.offsetWidth *
+      documentLayer.offsetWidth*
       zoom,
 
     height:
-      documentLayer.offsetHeight *
+      documentLayer.offsetHeight*
       zoom
 
   };
@@ -995,21 +1151,22 @@ function getSize(){
 }
 
 
-/* ==================================================
+/* =====================================================
    LIMIT PAN
-   ================================================== */
+   ===================================================== */
 
 function limitPan(){
 
   const vw =
     viewport.clientWidth;
 
+
   const vh =
     viewport.clientHeight;
 
 
   const size =
-    getSize();
+    getDocumentSize();
 
 
   /*
@@ -1025,11 +1182,11 @@ function limitPan(){
 
   }else{
 
-    const minX =
+    const minX=
       vw-size.width;
 
 
-    panX =
+    panX=
       Math.min(
         0,
         Math.max(
@@ -1054,11 +1211,11 @@ function limitPan(){
 
   }else{
 
-    const minY =
+    const minY=
       vh-size.height;
 
 
-    panY =
+    panY=
       Math.min(
         0,
         Math.max(
@@ -1072,17 +1229,13 @@ function limitPan(){
 }
 
 
-/* ==================================================
+/* =====================================================
    APPLY
-   ================================================== */
+   ===================================================== */
 
 function apply(){
 
   if(zoom<=1){
-
-    /*
-     * Normal mode.
-     */
 
     document.body.classList.remove(
       "zoom-mode"
@@ -1097,10 +1250,6 @@ function apply(){
 
   }
 
-
-  /*
-   * Zoom mode.
-   */
 
   document.body.classList.add(
     "zoom-mode"
@@ -1122,21 +1271,21 @@ function apply(){
 }
 
 
-/* ==================================================
+/* =====================================================
    ZOOM AROUND POINT
-   ================================================== */
+   ===================================================== */
 
 function zoomAround(
   newZoom,
-  pointX,
-  pointY
+  x,
+  y
 ){
 
-  const oldZoom =
+  const oldZoom=
     zoom;
 
 
-  newZoom =
+  newZoom=
     Math.max(
       1,
       Math.min(
@@ -1147,16 +1296,14 @@ function zoomAround(
 
 
   /*
-   * Kalau mulai zoom dari 100%,
-   * hitung posisi dokumen dari
-   * viewport.
+   * Kalau baru mulai zoom,
+   * simpan posisi browser.
    */
 
   if(oldZoom<=1){
 
-    /*
-     * Titik awal pada dokumen.
-     */
+    rememberReadingPosition();
+
 
     panX=0;
 
@@ -1165,26 +1312,35 @@ function zoomAround(
   }
 
 
-  const contentX =
-    (pointX-panX) /
+  /*
+   * Titik dokumen yang berada
+   * di bawah jari/mouse.
+   */
+
+  const contentX=
+    (x-panX)/
     oldZoom;
 
 
-  const contentY =
-    (pointY-panY) /
+  const contentY=
+    (y-panY)/
     oldZoom;
 
 
   zoom=newZoom;
 
 
-  panX =
-    pointX -
+  /*
+   * Pertahankan titik tersebut.
+   */
+
+  panX=
+    x-
     contentX*zoom;
 
 
-  panY =
-    pointY -
+  panY=
+    y-
     contentY*zoom;
 
 
@@ -1193,40 +1349,25 @@ function zoomAround(
 }
 
 
-/* ==================================================
-   BUTTON ZOOM IN
-   ================================================== */
+/* =====================================================
+   ZOOM IN
+   ===================================================== */
 
 function zoomIn(){
 
-  const x =
+  const x=
     viewport.clientWidth/2;
 
-  const y =
+
+  const y=
     viewport.clientHeight/2;
 
 
-  if(zoom<=1){
-
-    /*
-     * Mulai zoom.
-     */
-
-    zoomAround(
-      1.2,
-      x,
-      y
-    );
-
-  }else{
-
-    zoomAround(
-      zoom+0.2,
-      x,
-      y
-    );
-
-  }
+  zoomAround(
+    zoom+0.2,
+    x,
+    y
+  );
 
 
   show(
@@ -1238,9 +1379,9 @@ function zoomIn(){
 }
 
 
-/* ==================================================
-   BUTTON ZOOM OUT
-   ================================================== */
+/* =====================================================
+   ZOOM OUT
+   ===================================================== */
 
 function zoomOut(){
 
@@ -1251,14 +1392,15 @@ function zoomOut(){
   }
 
 
-  const x =
+  const x=
     viewport.clientWidth/2;
 
-  const y =
+
+  const y=
     viewport.clientHeight/2;
 
 
-  const newZoom =
+  const newZoom=
     Math.max(
       1,
       zoom-0.2
@@ -1267,7 +1409,7 @@ function zoomOut(){
 
   if(newZoom<=1){
 
-    exitZoomMode();
+    exitZoom();
 
     show("100%");
 
@@ -1292,9 +1434,9 @@ function zoomOut(){
 }
 
 
-/* ==================================================
+/* =====================================================
    DARK MODE
-   ================================================== */
+   ===================================================== */
 
 function toggleDark(){
 
@@ -1305,9 +1447,9 @@ function toggleDark(){
 }
 
 
-/* ==================================================
+/* =====================================================
    THUMBNAILS
-   ================================================== */
+   ===================================================== */
 
 function toggleThumbs(){
 
@@ -1320,40 +1462,56 @@ function toggleThumbs(){
 }
 
 
-/* ==================================================
-   PAGE
-   ================================================== */
+/* =====================================================
+   GO TO PAGE
+   ===================================================== */
 
 function goToPage(pageNumber){
 
-  const pages =
+  const canvases =
     documentLayer.querySelectorAll(
       "canvas"
     );
 
 
   const page =
-    pages[pageNumber-1];
+    canvases[pageNumber-1];
 
 
   if(!page){
+
     return;
+
   }
 
+
+  /*
+   * Kalau normal,
+   * pakai scroll browser.
+   */
 
   if(zoom<=1){
 
     page.scrollIntoView({
+
       behavior:"smooth",
+
       block:"start"
+
     });
+
 
     return;
 
   }
 
 
-  panY =
+  /*
+   * Kalau zoom,
+   * pindahkan pan vertikal.
+   */
+
+  panY=
     -page.offsetTop*zoom;
 
 
@@ -1362,55 +1520,59 @@ function goToPage(pageNumber){
 }
 
 
-/* ==================================================
+/* =====================================================
    BOOKMARK
-   ================================================== */
+   ===================================================== */
 
 function saveBookmark(){
-
-  /*
-   * Normal mode:
-   * simpan browser scroll.
-   */
 
   if(zoom<=1){
 
     localStorage.setItem(
+
       "bm_"+comic,
-      String(window.scrollY)
+
+      JSON.stringify({
+
+        scrollY:
+          window.scrollY,
+
+        page:
+          getCurrentPage().page,
+
+        offset:
+          getCurrentPage().offset
+
+      })
+
     );
 
 
-    show(
-      "Bookmark tersimpan"
+  }else{
+
+    localStorage.setItem(
+
+      "bm_"+comic,
+
+      JSON.stringify({
+
+        zoom:zoom,
+
+        panX:panX,
+
+        panY:panY,
+
+        page:savedPage,
+
+        offset:savedPageOffset,
+
+        scrollY:savedScrollY
+
+      })
+
     );
-
-
-    return;
 
   }
-
-
-  /*
-   * Zoom mode:
-   * simpan pan + zoom.
-   */
-
-  localStorage.setItem(
-
-    "bm_"+comic,
-
-    JSON.stringify({
-
-      x:panX,
-
-      y:panY,
-
-      zoom:zoom
-
-    })
-
-  );
 
 
   show(
@@ -1420,9 +1582,9 @@ function saveBookmark(){
 }
 
 
-/* ==================================================
+/* =====================================================
    FULLSCREEN
-   ================================================== */
+   ===================================================== */
 
 function goFull(){
 
@@ -1443,24 +1605,28 @@ function goFull(){
 }
 
 
-/* ==================================================
+/* =====================================================
    PROGRESS
-   ================================================== */
+   ===================================================== */
 
 function updateProgress(){
 
+  /*
+   * NORMAL
+   */
+
   if(zoom<=1){
 
-    const doc =
+    const doc=
       document.documentElement;
 
 
-    const max =
-      doc.scrollHeight -
+    const max=
+      doc.scrollHeight-
       doc.clientHeight;
 
 
-    const percent =
+    const percent=
       max>0
       ? doc.scrollTop/max*100
       : 0;
@@ -1477,22 +1643,23 @@ function updateProgress(){
   }
 
 
-  const size =
-    getSize();
+  /*
+   * ZOOM
+   */
+
+  const size=
+    getDocumentSize();
 
 
-  const vh =
-    viewport.clientHeight;
-
-
-  const maxY =
+  const maxY=
     Math.max(
       0,
-      size.height-vh
+      size.height-
+      viewport.clientHeight
     );
 
 
-  const currentY =
+  const current=
     Math.max(
       0,
       Math.min(
@@ -1502,9 +1669,9 @@ function updateProgress(){
     );
 
 
-  const percent =
+  const percent=
     maxY>0
-    ? currentY/maxY*100
+    ? current/maxY*100
     : 0;
 
 
@@ -1516,9 +1683,9 @@ function updateProgress(){
 }
 
 
-/* ==================================================
+/* =====================================================
    NORMAL SCROLL
-   ================================================== */
+   ===================================================== */
 
 window.addEventListener(
   "scroll",
@@ -1537,26 +1704,28 @@ window.addEventListener(
 );
 
 
-/* ==================================================
-   PINCH DISTANCE
-   ================================================== */
+/* =====================================================
+   TOUCH DISTANCE
+   ===================================================== */
 
 function getDistance(a,b){
 
   return Math.hypot(
 
-    a.clientX-b.clientX,
+    a.clientX-
+    b.clientX,
 
-    a.clientY-b.clientY
+    a.clientY-
+    b.clientY
 
   );
 
 }
 
 
-/* ==================================================
-   PINCH CENTER
-   ================================================== */
+/* =====================================================
+   TOUCH CENTER
+   ===================================================== */
 
 function getCenter(a,b){
 
@@ -1579,9 +1748,9 @@ function getCenter(a,b){
 }
 
 
-/* ==================================================
+/* =====================================================
    TOUCH START
-   ================================================== */
+   ===================================================== */
 
 viewport.addEventListener(
   "touchstart",
@@ -1589,13 +1758,25 @@ viewport.addEventListener(
 
     /*
      * ----------------------------------------------
-     * DUA JARI
+     * DUA JARI = PINCH
      * ----------------------------------------------
      */
 
     if(
       e.touches.length===2
     ){
+
+      /*
+       * Kalau mulai pinch dari 100%,
+       * simpan posisi halaman dulu.
+       */
+
+      if(zoom<=1){
+
+        rememberReadingPosition();
+
+      }
+
 
       isPinching=true;
 
@@ -1609,16 +1790,12 @@ viewport.addEventListener(
         );
 
 
-      pinchStartZoom=zoom;
+      pinchStartZoom=
+        zoom;
 
 
       lastTap=0;
 
-
-      /*
-       * Kalau sebelumnya 100%,
-       * masuk zoom setelah pinch bergerak.
-       */
 
       return;
 
@@ -1647,9 +1824,12 @@ viewport.addEventListener(
         e.touches[0].clientY;
 
 
-      panOriginX=panX;
+      panOriginX=
+        panX;
 
-      panOriginY=panY;
+
+      panOriginY=
+        panY;
 
 
       lastTap=0;
@@ -1663,9 +1843,9 @@ viewport.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    TOUCH MOVE
-   ================================================== */
+   ===================================================== */
 
 viewport.addEventListener(
   "touchmove",
@@ -1709,29 +1889,29 @@ viewport.addEventListener(
 
 
       const factor=
-        currentDistance /
+        currentDistance/
         pinchStartDistance;
 
 
-      const newZoom=
+      let newZoom=
         pinchStartZoom*
         factor;
 
 
+      newZoom=
+        Math.max(
+          1,
+          Math.min(
+            3,
+            newZoom
+          )
+        );
+
+
       /*
-       * Minimal zoom 1.
+       * Kalau mulai dari 100%,
+       * gunakan titik tengah jari.
        */
-
-      if(newZoom<=1){
-
-        zoom=1;
-
-        apply();
-
-        return;
-
-      }
-
 
       zoomAround(
         newZoom,
@@ -1747,7 +1927,7 @@ viewport.addEventListener(
 
     /*
      * ==============================================
-     * PAN SATU JARI
+     * PAN
      * ==============================================
      */
 
@@ -1771,11 +1951,13 @@ viewport.addEventListener(
 
 
       panX=
-        panOriginX+dx;
+        panOriginX+
+        dx;
 
 
       panY=
-        panOriginY+dy;
+        panOriginY+
+        dy;
 
 
       apply();
@@ -1789,18 +1971,18 @@ viewport.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    TOUCH END
-   ================================================== */
+   ===================================================== */
 
 viewport.addEventListener(
   "touchend",
   function(e){
 
     /*
-     * ----------------------------------------------
-     * PINCH SELESAI
-     * ----------------------------------------------
+     * ==============================================
+     * PINCH
+     * ==============================================
      */
 
     if(isPinching){
@@ -1815,12 +1997,12 @@ viewport.addEventListener(
 
 
         /*
-         * Zoom TETAP.
+         * Jangan reset zoom.
          */
 
         if(zoom>1){
 
-          enterZoomMode();
+          enterZoom();
 
           show(
             Math.round(
@@ -1839,9 +2021,9 @@ viewport.addEventListener(
 
 
     /*
-     * ----------------------------------------------
-     * PAN SELESAI
-     * ----------------------------------------------
+     * ==============================================
+     * PAN
+     * ==============================================
      */
 
     if(isPanning){
@@ -1854,9 +2036,9 @@ viewport.addEventListener(
 
 
     /*
-     * ----------------------------------------------
+     * ==============================================
      * DOUBLE TAP
-     * ----------------------------------------------
+     * ==============================================
      */
 
     if(
@@ -1904,14 +2086,16 @@ viewport.addEventListener(
           y
         );
 
+
       }else{
 
-        exitZoomMode();
+        exitZoom();
 
       }
 
 
       lastTap=0;
+
 
     }else{
 
@@ -1926,35 +2110,45 @@ viewport.addEventListener(
 );
 
 
-/* ==================================================
-   MOUSE PAN DESKTOP
-   ================================================== */
+/* =====================================================
+   MOUSE DRAG DESKTOP
+   ===================================================== */
 
 viewport.addEventListener(
   "mousedown",
   function(e){
 
     if(zoom<=1){
+
       return;
+
     }
 
 
     if(e.button!==0){
+
       return;
+
     }
 
 
     mouseDown=true;
 
 
-    mouseStartX=e.clientX;
+    mouseStartX=
+      e.clientX;
 
-    mouseStartY=e.clientY;
+
+    mouseStartY=
+      e.clientY;
 
 
-    mouseOriginX=panX;
+    mouseOriginX=
+      panX;
 
-    mouseOriginY=panY;
+
+    mouseOriginY=
+      panY;
 
 
     viewport.style.cursor=
@@ -2017,16 +2211,18 @@ window.addEventListener(
 );
 
 
-/* ==================================================
-   MOUSE WHEEL + CTRL ZOOM
-   ================================================== */
+/* =====================================================
+   CTRL + MOUSE WHEEL ZOOM
+   ===================================================== */
 
 viewport.addEventListener(
   "wheel",
   function(e){
 
     if(!e.ctrlKey){
+
       return;
+
     }
 
 
@@ -2059,7 +2255,7 @@ viewport.addEventListener(
 
     if(newZoom<=1){
 
-      exitZoomMode();
+      exitZoom();
 
       return;
 
@@ -2087,9 +2283,9 @@ viewport.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    KEYBOARD PAN
-   ================================================== */
+   ===================================================== */
 
 document.addEventListener(
   "keydown",
@@ -2100,7 +2296,9 @@ document.addEventListener(
       const amount=50;
 
 
-      if(e.key==="ArrowLeft"){
+      if(
+        e.key==="ArrowLeft"
+      ){
 
         panX+=amount;
 
@@ -2111,7 +2309,9 @@ document.addEventListener(
       }
 
 
-      if(e.key==="ArrowRight"){
+      if(
+        e.key==="ArrowRight"
+      ){
 
         panX-=amount;
 
@@ -2122,7 +2322,9 @@ document.addEventListener(
       }
 
 
-      if(e.key==="ArrowUp"){
+      if(
+        e.key==="ArrowUp"
+      ){
 
         panY+=amount;
 
@@ -2133,7 +2335,9 @@ document.addEventListener(
       }
 
 
-      if(e.key==="ArrowDown"){
+      if(
+        e.key==="ArrowDown"
+      ){
 
         panY-=amount;
 
@@ -2147,7 +2351,7 @@ document.addEventListener(
 
 
     /*
-     * Disable Ctrl+S / Ctrl+P.
+     * Disable Ctrl+P / Ctrl+S.
      */
 
     if(
@@ -2165,9 +2369,9 @@ document.addEventListener(
 );
 
 
-/* ==================================================
-   DISABLE CONTEXT MENU
-   ================================================== */
+/* =====================================================
+   CONTEXT MENU
+   ===================================================== */
 
 document.addEventListener(
   "contextmenu",
@@ -2179,9 +2383,9 @@ document.addEventListener(
 );
 
 
-/* ==================================================
-   DISABLE DRAG
-   ================================================== */
+/* =====================================================
+   DRAG
+   ===================================================== */
 
 document.addEventListener(
   "dragstart",
@@ -2193,9 +2397,9 @@ document.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    RESIZE
-   ================================================== */
+   ===================================================== */
 
 window.addEventListener(
   "resize",
@@ -2213,14 +2417,13 @@ window.addEventListener(
 );
 
 
-/* ==================================================
+/* =====================================================
    INITIAL
-   ================================================== */
+   ===================================================== */
 
 updateProgress();
 
 </script>
-
 
 </body>
 </html>
