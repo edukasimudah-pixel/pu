@@ -2,15 +2,22 @@
 <html lang="id">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
 <title>PDF Reader</title>
 
 <style>
-*{margin:0;padding:0;box-sizing:border-box}
+*{
+  margin:0;
+  padding:0;
+  box-sizing:border-box;
+}
+
 html,body{
   background:#0b0b0b;
+  color:#fff;
   font-family:Arial,sans-serif;
   overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
 }
 
 /* ===== TOOLBAR ===== */
@@ -38,6 +45,7 @@ html,body{
   color:#fff;
   font-size:18px;
   cursor:pointer;
+  touch-action:manipulation;
 }
 
 /* ===== PROGRESS ===== */
@@ -50,6 +58,7 @@ html,body{
   background:#222;
   z-index:999;
 }
+
 #bar{
   width:0%;
   height:100%;
@@ -61,14 +70,19 @@ html,body{
   max-width:780px;
   margin:59px auto 0;
   transform-origin:top center;
+  touch-action:pan-y;
+  will-change:transform;
 }
+
 canvas{
   display:block;
   width:100%;
   height:auto;
   background:#fff;
   margin-bottom:2px;
+  touch-action:none;
 }
+
 .dark canvas{
   filter:invert(1) hue-rotate(180deg);
 }
@@ -87,7 +101,11 @@ canvas{
   padding:6px;
   z-index:1001;
 }
-#thumbs.show{right:0}
+
+#thumbs.show{
+  right:0;
+}
+
 .thumb{
   width:100%;
   display:block;
@@ -95,6 +113,7 @@ canvas{
   border-radius:4px;
   border:1px solid #333;
   cursor:pointer;
+  touch-action:manipulation;
 }
 
 #thumbBtn{
@@ -110,6 +129,7 @@ canvas{
   font-size:22px;
   cursor:pointer;
   z-index:1002;
+  touch-action:manipulation;
 }
 
 /* ===== TOAST ===== */
@@ -124,6 +144,33 @@ canvas{
   border-radius:20px;
   display:none;
   z-index:1003;
+  white-space:nowrap;
+}
+
+/* ===== HP ===== */
+@media(max-width:600px){
+
+  #top{
+    height:52px;
+    padding:6px 8px;
+    gap:6px;
+  }
+
+  .btn{
+    width:38px;
+    height:38px;
+    font-size:17px;
+  }
+
+  #progress{
+    top:52px;
+  }
+
+  #viewer{
+    margin-top:55px;
+    max-width:none;
+    width:100%;
+  }
 }
 </style>
 </head>
@@ -138,164 +185,553 @@ canvas{
   <button class="btn" onclick="goFull()">⛶</button>
 </div>
 
-<div id="progress"><div id="bar"></div></div>
+<div id="progress">
+  <div id="bar"></div>
+</div>
 
 <div id="viewer"></div>
 
 <div id="thumbs"></div>
+
 <button id="thumbBtn" onclick="toggleThumbs()">☰</button>
+
 <div id="toast"></div>
 
+
 <script type="module">
-import * as pdfjsLib from "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
+
+import * as pdfjsLib from
+"https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
+
 const comic =
-new URLSearchParams(location.search).get("comic") || "Dwikora.pdf";
+new URLSearchParams(location.search).get("comic")
+|| "Dwikora.pdf";
 
-const pdf = await pdfjsLib.getDocument(comic).promise;
 
-const viewer = document.getElementById("viewer");
-const thumbs = document.getElementById("thumbs");
+const pdf =
+await pdfjsLib.getDocument(comic).promise;
+
+
+const viewer =
+document.getElementById("viewer");
+
+const thumbs =
+document.getElementById("thumbs");
+
 
 for(let i=1;i<=pdf.numPages;i++){
 
-  const page = await pdf.getPage(i);
+  const page =
+  await pdf.getPage(i);
 
-  const vp = page.getViewport({scale:1.6});
 
-  const canvas = document.createElement("canvas");
-  canvas.width = vp.width;
-  canvas.height = vp.height;
+  const vp =
+  page.getViewport({scale:1.6});
+
+
+  const canvas =
+  document.createElement("canvas");
+
+  canvas.width =
+  vp.width;
+
+  canvas.height =
+  vp.height;
+
 
   await page.render({
-    canvasContext:canvas.getContext("2d"),
+
+    canvasContext:
+    canvas.getContext("2d"),
+
     viewport:vp
+
   }).promise;
+
 
   viewer.appendChild(canvas);
 
-  const tv = page.getViewport({scale:.22});
 
-  const thumb = document.createElement("canvas");
-  thumb.width = tv.width;
-  thumb.height = tv.height;
+  /* THUMBNAIL */
+
+  const tv =
+  page.getViewport({scale:.22});
+
+
+  const thumb =
+  document.createElement("canvas");
+
+  thumb.width =
+  tv.width;
+
+  thumb.height =
+  tv.height;
+
 
   await page.render({
-    canvasContext:thumb.getContext("2d"),
+
+    canvasContext:
+    thumb.getContext("2d"),
+
     viewport:tv
+
   }).promise;
+
 
   thumb.className="thumb";
 
+
   thumb.onclick=()=>{
-    canvas.scrollIntoView({behavior:"smooth"});
+
+    canvas.scrollIntoView({
+      behavior:"smooth"
+    });
+
     thumbs.classList.remove("show");
+
   };
 
+
   thumbs.appendChild(thumb);
+
 }
 
-const pos = localStorage.getItem("bm_"+comic);
-if(pos) window.scrollTo(0,Number(pos));
+
+/* BOOKMARK */
+
+const pos =
+localStorage.getItem("bm_"+comic);
+
+if(pos){
+
+  window.scrollTo(
+    0,
+    Number(pos)
+  );
+
+}
+
 </script>
 
-<script>
-let zoom=1;
-const viewer=document.getElementById("viewer");
-const toast=document.getElementById("toast");
 
-function show(t){
- toast.innerText=t;
- toast.style.display="block";
- setTimeout(()=>toast.style.display="none",900);
+<script>
+
+/* ==========================================
+   ZOOM
+   ========================================== */
+
+let zoom=1;
+
+const viewer =
+document.getElementById("viewer");
+
+const toast =
+document.getElementById("toast");
+
+
+function show(text){
+
+  toast.innerText=text;
+
+  toast.style.display="block";
+
+  clearTimeout(window.toastTimer);
+
+  window.toastTimer=
+  setTimeout(()=>{
+
+    toast.style.display="none";
+
+  },900);
+
 }
+
+
+/* APPLY ZOOM */
 
 function apply(){
- viewer.style.transform=`scale(${zoom})`;
- viewer.style.marginBottom=((zoom-1)*140)+"vh";
+
+  viewer.style.transform=
+  `scale(${zoom})`;
+
+  viewer.style.marginBottom=
+  ((zoom-1)*140)+"vh";
+
 }
+
+
+/* TOMBOL + */
 
 function zoomIn(){
- zoom=Math.min(3,zoom+.2);
- apply();
- show(Math.round(zoom*100)+"%");
+
+  zoom=
+  Math.min(
+    3,
+    zoom+0.2
+  );
+
+  apply();
+
+  show(
+    Math.round(zoom*100)+"%"
+  );
+
 }
+
+
+/* TOMBOL − */
 
 function zoomOut(){
- zoom=Math.max(.5,zoom-.2);
- apply();
- show(Math.round(zoom*100)+"%");
+
+  zoom=
+  Math.max(
+    0.5,
+    zoom-0.2
+  );
+
+  apply();
+
+  show(
+    Math.round(zoom*100)+"%"
+  );
+
 }
+
+
+/* DARK MODE */
 
 function toggleDark(){
- document.body.classList.toggle("dark");
+
+  document.body.classList.toggle("dark");
+
 }
+
+
+/* THUMBNAIL */
 
 function toggleThumbs(){
- document.getElementById("thumbs").classList.toggle("show");
+
+  document
+  .getElementById("thumbs")
+  .classList.toggle("show");
+
 }
+
+
+/* BOOKMARK */
 
 function saveBookmark(){
- const comic=new URLSearchParams(location.search).get("comic")||"Dwikora.pdf";
- localStorage.setItem("bm_"+comic,window.scrollY);
- show("Bookmark");
+
+  const comic=
+  new URLSearchParams(location.search)
+  .get("comic")
+  || "Dwikora.pdf";
+
+  localStorage.setItem(
+    "bm_"+comic,
+    window.scrollY
+  );
+
+  show("Bookmark");
+
 }
+
+
+/* FULLSCREEN */
 
 function goFull(){
- if(!document.fullscreenElement){
-   document.documentElement.requestFullscreen();
- }else{
-   document.exitFullscreen();
- }
+
+  if(!document.fullscreenElement){
+
+    document.documentElement
+    .requestFullscreen()
+    .catch(()=>{});
+
+  }else{
+
+    document.exitFullscreen();
+
+  }
+
 }
 
-window.addEventListener("scroll",()=>{
- const h=document.documentElement;
- const p=(h.scrollTop/(h.scrollHeight-h.clientHeight))*100;
- document.getElementById("bar").style.width=p+"%";
-});
 
-let last=0;
-document.addEventListener("touchend",()=>{
- const now=Date.now();
- if(now-last<250){
-   zoom=zoom>1?1:2;
-   apply();
- }
- last=now;
-},{passive:true});
+/* ==========================================
+   PROGRESS BAR
+   ========================================== */
 
-let start=0,base=1;
-document.addEventListener("touchstart",e=>{
- if(e.touches.length===2){
-   start=Math.hypot(
-     e.touches[0].clientX-e.touches[1].clientX,
-     e.touches[0].clientY-e.touches[1].clientY
-   );
-   base=zoom;
- }
-},{passive:true});
+window.addEventListener(
+  "scroll",
+  ()=>{
 
-document.addEventListener("touchmove",e=>{
- if(e.touches.length===2){
-   const d=Math.hypot(
-     e.touches[0].clientX-e.touches[1].clientX,
-     e.touches[0].clientY-e.touches[1].clientY
-   );
-   zoom=Math.max(.5,Math.min(3,base*(d/start)));
-   apply();
- }
-},{passive:true});
+    const h=
+    document.documentElement;
 
-document.addEventListener("contextmenu",e=>e.preventDefault());
-document.addEventListener("dragstart",e=>e.preventDefault());
-document.addEventListener("keydown",e=>{
- if((e.ctrlKey||e.metaKey)&&["p","s"].includes(e.key.toLowerCase()))
-   e.preventDefault();
-});
+    const max=
+    h.scrollHeight-h.clientHeight;
+
+    const p=
+    max>0
+    ? (h.scrollTop/max)*100
+    : 0;
+
+    document
+    .getElementById("bar")
+    .style.width=
+    p+"%";
+
+  },
+  {passive:true}
+);
+
+
+/* ==========================================
+   DOUBLE TAP
+   ========================================== */
+
+/*
+   Double tap hanya berlaku untuk SATU jari.
+   Jadi tidak bentrok dengan pinch zoom.
+*/
+
+let lastTap=0;
+
+document.addEventListener(
+  "touchend",
+  function(e){
+
+    /*
+     * Kalau sebelumnya pinch,
+     * jangan dianggap double tap.
+     */
+
+    if(wasPinching){
+
+      wasPinching=false;
+
+      lastTap=0;
+
+      return;
+
+    }
+
+
+    /*
+     * Hanya proses single-touch.
+     */
+
+    if(e.changedTouches.length!==1){
+
+      lastTap=0;
+
+      return;
+
+    }
+
+
+    const now=
+    Date.now();
+
+
+    if(
+      now-lastTap<300
+    ){
+
+      zoom=
+      zoom>1
+      ? 1
+      : 2;
+
+      apply();
+
+      show(
+        Math.round(zoom*100)+"%"
+      );
+
+      lastTap=0;
+
+    }else{
+
+      lastTap=now;
+
+    }
+
+  },
+  {passive:true}
+);
+
+
+/* ==========================================
+   PINCH ZOOM
+   ========================================== */
+
+let pinchStart=0;
+
+let pinchBase=1;
+
+let isPinching=false;
+
+let wasPinching=false;
+
+
+function getDistance(a,b){
+
+  return Math.hypot(
+
+    a.clientX-b.clientX,
+
+    a.clientY-b.clientY
+
+  );
+
+}
+
+
+/* MULAI PINCH */
+
+document.addEventListener(
+  "touchstart",
+  function(e){
+
+    if(e.touches.length===2){
+
+      isPinching=true;
+
+      wasPinching=true;
+
+      pinchStart=
+      getDistance(
+        e.touches[0],
+        e.touches[1]
+      );
+
+      pinchBase=zoom;
+
+      /*
+       * Matikan double-tap sementara
+       */
+
+      lastTap=0;
+
+    }
+
+  },
+  {passive:true}
+);
+
+
+/* GERAK PINCH */
+
+document.addEventListener(
+  "touchmove",
+  function(e){
+
+    if(
+      e.touches.length===2 &&
+      isPinching &&
+      pinchStart>0
+    ){
+
+      const current=
+      getDistance(
+        e.touches[0],
+        e.touches[1]
+      );
+
+
+      zoom=
+      pinchBase*
+      (current/pinchStart);
+
+
+      zoom=
+      Math.max(
+        0.5,
+        Math.min(3,zoom)
+      );
+
+
+      apply();
+
+    }
+
+  },
+  {passive:true}
+);
+
+
+/* SELESAI PINCH */
+
+document.addEventListener(
+  "touchend",
+  function(e){
+
+    if(
+      isPinching &&
+      e.touches.length<2
+    ){
+
+      isPinching=false;
+
+      pinchStart=0;
+
+      /*
+       * PENTING:
+       * zoom TIDAK di-reset.
+       */
+
+      show(
+        Math.round(zoom*100)+"%"
+      );
+
+    }
+
+  },
+  {passive:true}
+);
+
+
+/* ==========================================
+   DISABLE CONTEXT MENU / DRAG
+   ========================================== */
+
+document.addEventListener(
+  "contextmenu",
+  e=>e.preventDefault()
+);
+
+document.addEventListener(
+  "dragstart",
+  e=>e.preventDefault()
+);
+
+
+/* ==========================================
+   DISABLE PRINT / SAVE
+   ========================================== */
+
+document.addEventListener(
+  "keydown",
+  e=>{
+
+    if(
+      (e.ctrlKey||e.metaKey) &&
+      ["p","s"].includes(
+        e.key.toLowerCase()
+      )
+    ){
+
+      e.preventDefault();
+
+    }
+
+  }
+);
+
 </script>
 
 </body>
