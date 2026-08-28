@@ -12,7 +12,6 @@
 
 <title>PDF Reader</title>
 
-
 <style>
 
 /* ==========================================
@@ -35,7 +34,10 @@ body{
   background:#0b0b0b;
   color:#fff;
   font-family:Arial,sans-serif;
-  overflow-x:hidden;
+
+  overflow-x:auto;
+  overflow-y:auto;
+
   -webkit-overflow-scrolling:touch;
 }
 
@@ -87,7 +89,7 @@ body{
 
 
 /* ==========================================
-   PROGRESS BAR
+   PROGRESS
    ========================================== */
 
 #progress{
@@ -118,21 +120,30 @@ body{
    ========================================== */
 
 #viewer{
-
   width:100%;
   max-width:780px;
 
   margin:59px auto 0;
 
-  transform-origin:top center;
-
   /*
    * PENTING:
-   * Satu jari tetap bisa scroll vertikal.
+   * Jangan menggunakan transform:scale().
+   * Kita menggunakan CSS zoom agar ukuran
+   * layout ikut membesar dan scroll tetap jalan.
+   */
+
+  zoom:1;
+
+  transform:none;
+
+  transform-origin:top left;
+
+  /*
+   * Satu jari tetap bisa scroll.
    */
   touch-action:pan-y;
 
-  will-change:transform;
+  position:relative;
 }
 
 
@@ -141,7 +152,6 @@ body{
    ========================================== */
 
 canvas{
-
   display:block;
 
   width:100%;
@@ -152,8 +162,8 @@ canvas{
   margin-bottom:2px;
 
   /*
-   * Jangan gunakan touch-action:none.
-   * Ini yang membuat HP tidak bisa scroll.
+   * Biarkan browser menangani scroll
+   * satu jari.
    */
   touch-action:pan-y;
 
@@ -161,6 +171,10 @@ canvas{
   user-select:none;
 
   -webkit-touch-callout:none;
+
+  /*
+   * Jangan gunakan transform pada canvas.
+   */
 }
 
 
@@ -178,7 +192,6 @@ canvas{
    ========================================== */
 
 #thumbs{
-
   position:fixed;
 
   right:-140px;
@@ -211,7 +224,6 @@ canvas{
 
 
 .thumb{
-
   width:100%;
 
   display:block;
@@ -229,11 +241,10 @@ canvas{
 
 
 /* ==========================================
-   THUMBNAIL BUTTON
+   THUMB BUTTON
    ========================================== */
 
 #thumbBtn{
-
   position:fixed;
 
   right:14px;
@@ -243,6 +254,7 @@ canvas{
   height:52px;
 
   border:none;
+
   border-radius:50%;
 
   background:#2563EB;
@@ -266,7 +278,6 @@ canvas{
    ========================================== */
 
 #toast{
-
   position:fixed;
 
   left:50%;
@@ -297,41 +308,35 @@ canvas{
 @media(max-width:600px){
 
   #top{
-
     height:52px;
 
     padding:6px 8px;
 
     gap:6px;
-
   }
 
 
   .btn{
-
     width:38px;
     height:38px;
 
     font-size:17px;
-
   }
 
 
   #progress{
-
     top:52px;
-
   }
 
 
   #viewer{
-
     margin-top:55px;
 
     max-width:none;
 
     width:100%;
 
+    zoom:1;
   }
 
 }
@@ -345,13 +350,16 @@ canvas{
 
   #top{
     gap:4px;
+
     padding-left:5px;
     padding-right:5px;
   }
 
+
   .btn{
     width:36px;
     height:36px;
+
     font-size:16px;
   }
 
@@ -377,11 +385,13 @@ canvas{
     −
   </button>
 
+
   <button class="btn"
           onclick="zoomIn()"
           aria-label="Zoom in">
     +
   </button>
+
 
   <button class="btn"
           onclick="toggleDark()"
@@ -389,11 +399,13 @@ canvas{
     🌙
   </button>
 
+
   <button class="btn"
           onclick="saveBookmark()"
           aria-label="Bookmark">
     🔖
   </button>
+
 
   <button class="btn"
           onclick="goFull()"
@@ -414,7 +426,7 @@ canvas{
 
 
 <!-- ========================================
-     PDF VIEWER
+     PDF
      ======================================== -->
 
 <div id="viewer"></div>
@@ -434,10 +446,6 @@ canvas{
 </button>
 
 
-<!-- ========================================
-     TOAST
-     ======================================== -->
-
 <div id="toast"></div>
 
 
@@ -452,36 +460,37 @@ import * as pdfjsLib from
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 
 
-/* Worker */
-
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
 
-/* PDF yang dibuka */
+/* ==========================================
+   NAMA PDF
+   ========================================== */
 
 const comic =
 new URLSearchParams(location.search).get("comic")
 || "Dwikora.pdf";
 
 
-/* Load PDF */
+/* ==========================================
+   LOAD PDF
+   ========================================== */
 
 const pdf =
 await pdfjsLib.getDocument(comic).promise;
 
 
-/* Element */
-
 const viewer =
 document.getElementById("viewer");
+
 
 const thumbs =
 document.getElementById("thumbs");
 
 
 /* ==========================================
-   RENDER SEMUA HALAMAN
+   RENDER HALAMAN
    ========================================== */
 
 for(let i=1;i<=pdf.numPages;i++){
@@ -490,7 +499,9 @@ for(let i=1;i<=pdf.numPages;i++){
   await pdf.getPage(i);
 
 
-  /* Ukuran halaman utama */
+  /*
+   * Resolusi halaman utama.
+   */
 
   const viewport =
   page.getViewport({
@@ -498,14 +509,13 @@ for(let i=1;i<=pdf.numPages;i++){
   });
 
 
-  /* Canvas utama */
-
   const canvas =
   document.createElement("canvas");
 
 
   canvas.width =
   viewport.width;
+
 
   canvas.height =
   viewport.height;
@@ -544,6 +554,7 @@ for(let i=1;i<=pdf.numPages;i++){
   thumb.width =
   thumbViewport.width;
 
+
   thumb.height =
   thumbViewport.height;
 
@@ -564,14 +575,13 @@ for(let i=1;i<=pdf.numPages;i++){
   thumb.className="thumb";
 
 
-  /* Klik thumbnail */
-
   thumb.onclick=()=>{
 
     canvas.scrollIntoView({
       behavior:"smooth",
       block:"start"
     });
+
 
     thumbs.classList.remove("show");
 
@@ -584,22 +594,22 @@ for(let i=1;i<=pdf.numPages;i++){
 
 
 /* ==========================================
-   LOAD BOOKMARK
+   BOOKMARK
    ========================================== */
 
-const savedPosition =
+const saved =
 localStorage.getItem(
   "bm_"+comic
 );
 
 
-if(savedPosition){
+if(saved){
 
   setTimeout(()=>{
 
     window.scrollTo(
       0,
-      Number(savedPosition)
+      Number(saved)
     );
 
   },100);
@@ -619,10 +629,13 @@ if(savedPosition){
 let zoom=1;
 
 
-/* Elements */
+/* ==========================================
+   ELEMENT
+   ========================================== */
 
 const viewer =
 document.getElementById("viewer");
+
 
 const toast =
 document.getElementById("toast");
@@ -660,17 +673,30 @@ function show(text){
 
 function apply(){
 
-  viewer.style.transform =
-    `scale(${zoom})`;
+  /*
+   * CSS ZOOM.
+   *
+   * Berbeda dengan transform:scale(),
+   * CSS zoom membuat ukuran layout ikut
+   * membesar sehingga scrollHeight browser
+   * ikut bertambah.
+   */
+
+  viewer.style.zoom=zoom;
 
 
   /*
-   * Tambahkan ruang bawah ketika zoom.
-   * Supaya halaman terakhir tetap bisa dicapai.
+   * Pastikan browser menghitung ulang
+   * layout setelah zoom.
    */
 
-  viewer.style.marginBottom =
-    ((zoom-1)*140)+"vh";
+  document.body.style.minHeight =
+    "auto";
+
+
+  window.dispatchEvent(
+    new Event("resize")
+  );
 
 }
 
@@ -681,10 +707,12 @@ function apply(){
 
 function zoomIn(){
 
-  zoom =
+  zoom=
     Math.min(
       3,
-      zoom+0.2
+      Math.round(
+        (zoom+0.2)*10
+      )/10
     );
 
 
@@ -704,10 +732,12 @@ function zoomIn(){
 
 function zoomOut(){
 
-  zoom =
+  zoom=
     Math.max(
       0.5,
-      zoom-0.2
+      Math.round(
+        (zoom-0.2)*10
+      )/10
     );
 
 
@@ -765,7 +795,9 @@ function saveBookmark(){
   );
 
 
-  show("Bookmark tersimpan");
+  show(
+    "Bookmark tersimpan"
+  );
 
 }
 
@@ -839,14 +871,12 @@ let isPinching=false;
 
 
 /*
- * Menandai bahwa touch terakhir
- * adalah pinch.
+ * Ini untuk mencegah pinch dianggap
+ * sebagai double tap.
  */
 
 let wasPinching=false;
 
-
-/* Hitung jarak dua jari */
 
 function getDistance(a,b){
 
@@ -870,7 +900,7 @@ document.addEventListener(
   function(e){
 
     /*
-     * Dua jari = PINCH
+     * Dua jari = pinch.
      */
 
     if(e.touches.length===2){
@@ -891,7 +921,7 @@ document.addEventListener(
 
 
       /*
-       * Batalkan double-tap
+       * Jangan anggap sebagai double tap.
        */
 
       lastTap=0;
@@ -905,7 +935,6 @@ document.addEventListener(
 );
 
 
-
 /* ==========================================
    TOUCH MOVE
    ========================================== */
@@ -913,10 +942,6 @@ document.addEventListener(
 document.addEventListener(
   "touchmove",
   function(e){
-
-    /*
-     * Pinch hanya kalau ada dua jari
-     */
 
     if(
       e.touches.length===2 &&
@@ -933,11 +958,14 @@ document.addEventListener(
 
       let newZoom =
         pinchBase *
-        (current/pinchStart);
+        (
+          current /
+          pinchStart
+        );
 
 
       /*
-       * Batas zoom
+       * Batasi 50% - 300%.
        */
 
       newZoom =
@@ -950,7 +978,16 @@ document.addEventListener(
         );
 
 
-      zoom=newZoom;
+      /*
+       * Sedikit pembulatan supaya
+       * zoom tidak menghasilkan angka
+       * terlalu panjang.
+       */
+
+      zoom =
+        Math.round(
+          newZoom*100
+        )/100;
 
 
       apply();
@@ -964,7 +1001,6 @@ document.addEventListener(
 );
 
 
-
 /* ==========================================
    TOUCH END
    ========================================== */
@@ -975,7 +1011,7 @@ document.addEventListener(
 
     /*
      * Kalau sedang pinch,
-     * jangan reset zoom.
+     * JANGAN reset zoom.
      */
 
     if(isPinching){
@@ -986,15 +1022,19 @@ document.addEventListener(
 
         pinchStart=0;
 
+
         /*
-         * Zoom dibiarkan apa adanya.
+         * Zoom tetap.
          */
 
         show(
-          Math.round(zoom*100)+"%"
+          Math.round(
+            zoom*100
+          )+"%"
         );
 
       }
+
 
       return;
 
@@ -1002,8 +1042,8 @@ document.addEventListener(
 
 
     /*
-     * Kalau bukan pinch,
-     * proses double tap.
+     * Hanya single finger yang boleh
+     * diproses sebagai double tap.
      */
 
     if(
@@ -1026,8 +1066,10 @@ document.addEventListener(
     ){
 
       /*
-       * Double tap:
-       * 100% <-> 200%
+       * DOUBLE TAP
+       *
+       * 100% -> 200%
+       * 200% -> 100%
        */
 
       zoom =
@@ -1040,7 +1082,9 @@ document.addEventListener(
 
 
       show(
-        Math.round(zoom*100)+"%"
+        Math.round(
+          zoom*100
+        )+"%"
       );
 
 
@@ -1067,7 +1111,7 @@ let lastTap=0;
 
 
 /* ==========================================
-   DISABLE CONTEXT MENU
+   CONTEXT MENU
    ========================================== */
 
 document.addEventListener(
@@ -1081,7 +1125,7 @@ document.addEventListener(
 
 
 /* ==========================================
-   DISABLE IMAGE DRAG
+   DRAG
    ========================================== */
 
 document.addEventListener(
@@ -1095,7 +1139,7 @@ document.addEventListener(
 
 
 /* ==========================================
-   DISABLE PRINT / SAVE
+   PRINT / SAVE
    ========================================== */
 
 document.addEventListener(
