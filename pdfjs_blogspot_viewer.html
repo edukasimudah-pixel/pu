@@ -1,18 +1,37 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
+
+<meta name="viewport"
+      content="width=device-width,
+               initial-scale=1.0,
+               maximum-scale=5.0,
+               viewport-fit=cover">
+
 <title>PDF Reader</title>
 
+
 <style>
+
+/* ==========================================
+   RESET
+   ========================================== */
+
 *{
   margin:0;
   padding:0;
   box-sizing:border-box;
 }
 
-html,body{
+
+/* ==========================================
+   BODY
+   ========================================== */
+
+html,
+body{
   background:#0b0b0b;
   color:#fff;
   font-family:Arial,sans-serif;
@@ -20,201 +39,439 @@ html,body{
   -webkit-overflow-scrolling:touch;
 }
 
-/* ===== TOOLBAR ===== */
+
+/* ==========================================
+   TOOLBAR
+   ========================================== */
+
 #top{
   position:fixed;
   top:0;
   left:0;
   right:0;
+
   height:56px;
+
   background:#111;
+
   display:flex;
   justify-content:flex-end;
   align-items:center;
+
   gap:8px;
   padding:8px 12px;
+
   z-index:1000;
 }
+
 
 .btn{
   width:40px;
   height:40px;
+
   border:none;
   border-radius:8px;
+
   background:#2563EB;
+
   color:#fff;
+
   font-size:18px;
+
   cursor:pointer;
+
   touch-action:manipulation;
+
+  -webkit-tap-highlight-color:transparent;
 }
 
-/* ===== PROGRESS ===== */
+
+/* ==========================================
+   PROGRESS BAR
+   ========================================== */
+
 #progress{
   position:fixed;
+
   top:56px;
   left:0;
   right:0;
+
   height:3px;
+
   background:#222;
+
   z-index:999;
 }
+
 
 #bar{
   width:0%;
   height:100%;
+
   background:#60A5FA;
 }
 
-/* ===== PDF ===== */
+
+/* ==========================================
+   PDF VIEWER
+   ========================================== */
+
 #viewer{
+
+  width:100%;
   max-width:780px;
+
   margin:59px auto 0;
+
   transform-origin:top center;
+
+  /*
+   * PENTING:
+   * Satu jari tetap bisa scroll vertikal.
+   */
   touch-action:pan-y;
+
   will-change:transform;
 }
 
+
+/* ==========================================
+   PDF CANVAS
+   ========================================== */
+
 canvas{
+
   display:block;
+
   width:100%;
   height:auto;
+
   background:#fff;
+
   margin-bottom:2px;
-  touch-action:none;
+
+  /*
+   * Jangan gunakan touch-action:none.
+   * Ini yang membuat HP tidak bisa scroll.
+   */
+  touch-action:pan-y;
+
+  -webkit-user-select:none;
+  user-select:none;
+
+  -webkit-touch-callout:none;
 }
+
+
+/* ==========================================
+   DARK MODE
+   ========================================== */
 
 .dark canvas{
   filter:invert(1) hue-rotate(180deg);
 }
 
-/* ===== THUMB ===== */
+
+/* ==========================================
+   THUMBNAILS
+   ========================================== */
+
 #thumbs{
+
   position:fixed;
+
   right:-140px;
+
   top:70px;
+
   width:130px;
+
   height:calc(100vh - 90px);
+
   background:#111;
+
   overflow-y:auto;
+
   border-left:1px solid #333;
+
   transition:.25s;
+
   padding:6px;
+
   z-index:1001;
+
+  -webkit-overflow-scrolling:touch;
 }
+
 
 #thumbs.show{
   right:0;
 }
 
+
 .thumb{
+
   width:100%;
+
   display:block;
+
   margin-bottom:6px;
+
   border-radius:4px;
+
   border:1px solid #333;
+
   cursor:pointer;
+
   touch-action:manipulation;
 }
+
+
+/* ==========================================
+   THUMBNAIL BUTTON
+   ========================================== */
 
 #thumbBtn{
+
   position:fixed;
+
   right:14px;
   bottom:18px;
+
   width:52px;
   height:52px;
+
   border:none;
   border-radius:50%;
+
   background:#2563EB;
+
   color:#fff;
+
   font-size:22px;
+
   cursor:pointer;
+
   z-index:1002;
+
   touch-action:manipulation;
+
+  -webkit-tap-highlight-color:transparent;
 }
 
-/* ===== TOAST ===== */
+
+/* ==========================================
+   TOAST
+   ========================================== */
+
 #toast{
+
   position:fixed;
+
   left:50%;
   bottom:20px;
+
   transform:translateX(-50%);
+
   background:#111;
+
   color:#fff;
+
   padding:10px 16px;
+
   border-radius:20px;
+
   display:none;
+
   z-index:1003;
+
   white-space:nowrap;
 }
 
-/* ===== HP ===== */
+
+/* ==========================================
+   MOBILE
+   ========================================== */
+
 @media(max-width:600px){
 
   #top{
+
     height:52px;
+
     padding:6px 8px;
+
     gap:6px;
+
+  }
+
+
+  .btn{
+
+    width:38px;
+    height:38px;
+
+    font-size:17px;
+
+  }
+
+
+  #progress{
+
+    top:52px;
+
+  }
+
+
+  #viewer{
+
+    margin-top:55px;
+
+    max-width:none;
+
+    width:100%;
+
+  }
+
+}
+
+
+/* ==========================================
+   SMALL PHONE
+   ========================================== */
+
+@media(max-width:380px){
+
+  #top{
+    gap:4px;
+    padding-left:5px;
+    padding-right:5px;
   }
 
   .btn{
-    width:38px;
-    height:38px;
-    font-size:17px;
+    width:36px;
+    height:36px;
+    font-size:16px;
   }
 
-  #progress{
-    top:52px;
-  }
-
-  #viewer{
-    margin-top:55px;
-    max-width:none;
-    width:100%;
-  }
 }
+
 </style>
+
 </head>
+
 
 <body>
 
+
+<!-- ========================================
+     TOOLBAR
+     ======================================== -->
+
 <div id="top">
-  <button class="btn" onclick="zoomOut()">−</button>
-  <button class="btn" onclick="zoomIn()">+</button>
-  <button class="btn" onclick="toggleDark()">🌙</button>
-  <button class="btn" onclick="saveBookmark()">🔖</button>
-  <button class="btn" onclick="goFull()">⛶</button>
+
+  <button class="btn"
+          onclick="zoomOut()"
+          aria-label="Zoom out">
+    −
+  </button>
+
+  <button class="btn"
+          onclick="zoomIn()"
+          aria-label="Zoom in">
+    +
+  </button>
+
+  <button class="btn"
+          onclick="toggleDark()"
+          aria-label="Dark mode">
+    🌙
+  </button>
+
+  <button class="btn"
+          onclick="saveBookmark()"
+          aria-label="Bookmark">
+    🔖
+  </button>
+
+  <button class="btn"
+          onclick="goFull()"
+          aria-label="Fullscreen">
+    ⛶
+  </button>
+
 </div>
+
+
+<!-- ========================================
+     PROGRESS
+     ======================================== -->
 
 <div id="progress">
   <div id="bar"></div>
 </div>
 
+
+<!-- ========================================
+     PDF VIEWER
+     ======================================== -->
+
 <div id="viewer"></div>
+
+
+<!-- ========================================
+     THUMBNAILS
+     ======================================== -->
 
 <div id="thumbs"></div>
 
-<button id="thumbBtn" onclick="toggleThumbs()">☰</button>
+
+<button id="thumbBtn"
+        onclick="toggleThumbs()"
+        aria-label="Thumbnails">
+  ☰
+</button>
+
+
+<!-- ========================================
+     TOAST
+     ======================================== -->
 
 <div id="toast"></div>
 
+
+
+<!-- ========================================
+     PDF.JS
+     ======================================== -->
 
 <script type="module">
 
 import * as pdfjsLib from
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.min.mjs";
 
+
+/* Worker */
+
 pdfjsLib.GlobalWorkerOptions.workerSrc =
 "https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.6.82/pdf.worker.min.mjs";
 
+
+/* PDF yang dibuka */
 
 const comic =
 new URLSearchParams(location.search).get("comic")
 || "Dwikora.pdf";
 
 
+/* Load PDF */
+
 const pdf =
 await pdfjsLib.getDocument(comic).promise;
 
+
+/* Element */
 
 const viewer =
 document.getElementById("viewer");
@@ -223,32 +480,46 @@ const thumbs =
 document.getElementById("thumbs");
 
 
+/* ==========================================
+   RENDER SEMUA HALAMAN
+   ========================================== */
+
 for(let i=1;i<=pdf.numPages;i++){
 
   const page =
   await pdf.getPage(i);
 
 
-  const vp =
-  page.getViewport({scale:1.6});
+  /* Ukuran halaman utama */
 
+  const viewport =
+  page.getViewport({
+    scale:1.6
+  });
+
+
+  /* Canvas utama */
 
   const canvas =
   document.createElement("canvas");
 
+
   canvas.width =
-  vp.width;
+  viewport.width;
 
   canvas.height =
-  vp.height;
+  viewport.height;
+
+
+  const context =
+  canvas.getContext("2d");
 
 
   await page.render({
 
-    canvasContext:
-    canvas.getContext("2d"),
+    canvasContext:context,
 
-    viewport:vp
+    viewport:viewport
 
   }).promise;
 
@@ -256,28 +527,36 @@ for(let i=1;i<=pdf.numPages;i++){
   viewer.appendChild(canvas);
 
 
-  /* THUMBNAIL */
+  /* ========================================
+     THUMBNAIL
+     ======================================== */
 
-  const tv =
-  page.getViewport({scale:.22});
+  const thumbViewport =
+  page.getViewport({
+    scale:.22
+  });
 
 
   const thumb =
   document.createElement("canvas");
 
+
   thumb.width =
-  tv.width;
+  thumbViewport.width;
 
   thumb.height =
-  tv.height;
+  thumbViewport.height;
+
+
+  const thumbContext =
+  thumb.getContext("2d");
 
 
   await page.render({
 
-    canvasContext:
-    thumb.getContext("2d"),
+    canvasContext:thumbContext,
 
-    viewport:tv
+    viewport:thumbViewport
 
   }).promise;
 
@@ -285,10 +564,13 @@ for(let i=1;i<=pdf.numPages;i++){
   thumb.className="thumb";
 
 
+  /* Klik thumbnail */
+
   thumb.onclick=()=>{
 
     canvas.scrollIntoView({
-      behavior:"smooth"
+      behavior:"smooth",
+      block:"start"
     });
 
     thumbs.classList.remove("show");
@@ -301,30 +583,43 @@ for(let i=1;i<=pdf.numPages;i++){
 }
 
 
-/* BOOKMARK */
+/* ==========================================
+   LOAD BOOKMARK
+   ========================================== */
 
-const pos =
-localStorage.getItem("bm_"+comic);
+const savedPosition =
+localStorage.getItem(
+  "bm_"+comic
+);
 
-if(pos){
 
-  window.scrollTo(
-    0,
-    Number(pos)
-  );
+if(savedPosition){
+
+  setTimeout(()=>{
+
+    window.scrollTo(
+      0,
+      Number(savedPosition)
+    );
+
+  },100);
 
 }
 
 </script>
 
 
+
+<!-- ========================================
+     CONTROLS
+     ======================================== -->
+
 <script>
 
-/* ==========================================
-   ZOOM
-   ========================================== */
-
 let zoom=1;
+
+
+/* Elements */
 
 const viewer =
 document.getElementById("viewer");
@@ -333,15 +628,23 @@ const toast =
 document.getElementById("toast");
 
 
+/* ==========================================
+   TOAST
+   ========================================== */
+
 function show(text){
 
   toast.innerText=text;
 
   toast.style.display="block";
 
-  clearTimeout(window.toastTimer);
 
-  window.toastTimer=
+  clearTimeout(
+    window.toastTimer
+  );
+
+
+  window.toastTimer =
   setTimeout(()=>{
 
     toast.style.display="none";
@@ -351,30 +654,42 @@ function show(text){
 }
 
 
-/* APPLY ZOOM */
+/* ==========================================
+   APPLY ZOOM
+   ========================================== */
 
 function apply(){
 
-  viewer.style.transform=
-  `scale(${zoom})`;
+  viewer.style.transform =
+    `scale(${zoom})`;
 
-  viewer.style.marginBottom=
-  ((zoom-1)*140)+"vh";
+
+  /*
+   * Tambahkan ruang bawah ketika zoom.
+   * Supaya halaman terakhir tetap bisa dicapai.
+   */
+
+  viewer.style.marginBottom =
+    ((zoom-1)*140)+"vh";
 
 }
 
 
-/* TOMBOL + */
+/* ==========================================
+   ZOOM IN
+   ========================================== */
 
 function zoomIn(){
 
-  zoom=
-  Math.min(
-    3,
-    zoom+0.2
-  );
+  zoom =
+    Math.min(
+      3,
+      zoom+0.2
+    );
+
 
   apply();
+
 
   show(
     Math.round(zoom*100)+"%"
@@ -383,17 +698,21 @@ function zoomIn(){
 }
 
 
-/* TOMBOL − */
+/* ==========================================
+   ZOOM OUT
+   ========================================== */
 
 function zoomOut(){
 
-  zoom=
-  Math.max(
-    0.5,
-    zoom-0.2
-  );
+  zoom =
+    Math.max(
+      0.5,
+      zoom-0.2
+    );
+
 
   apply();
+
 
   show(
     Math.round(zoom*100)+"%"
@@ -402,54 +721,66 @@ function zoomOut(){
 }
 
 
-/* DARK MODE */
+/* ==========================================
+   DARK MODE
+   ========================================== */
 
 function toggleDark(){
 
-  document.body.classList.toggle("dark");
+  document.body.classList.toggle(
+    "dark"
+  );
 
 }
 
 
-/* THUMBNAIL */
+/* ==========================================
+   THUMBNAILS
+   ========================================== */
 
 function toggleThumbs(){
 
   document
-  .getElementById("thumbs")
-  .classList.toggle("show");
+    .getElementById("thumbs")
+    .classList.toggle("show");
 
 }
 
 
-/* BOOKMARK */
+/* ==========================================
+   BOOKMARK
+   ========================================== */
 
 function saveBookmark(){
 
-  const comic=
-  new URLSearchParams(location.search)
-  .get("comic")
-  || "Dwikora.pdf";
+  const comic =
+    new URLSearchParams(location.search)
+      .get("comic")
+    || "Dwikora.pdf";
+
 
   localStorage.setItem(
     "bm_"+comic,
     window.scrollY
   );
 
-  show("Bookmark");
+
+  show("Bookmark tersimpan");
 
 }
 
 
-/* FULLSCREEN */
+/* ==========================================
+   FULLSCREEN
+   ========================================== */
 
 function goFull(){
 
   if(!document.fullscreenElement){
 
     document.documentElement
-    .requestFullscreen()
-    .catch(()=>{});
+      .requestFullscreen()
+      .catch(()=>{});
 
   }else{
 
@@ -466,103 +797,34 @@ function goFull(){
 
 window.addEventListener(
   "scroll",
-  ()=>{
+  function(){
 
-    const h=
-    document.documentElement;
+    const doc =
+      document.documentElement;
 
-    const max=
-    h.scrollHeight-h.clientHeight;
 
-    const p=
-    max>0
-    ? (h.scrollTop/max)*100
-    : 0;
+    const max =
+      doc.scrollHeight -
+      doc.clientHeight;
+
+
+    const percent =
+      max>0
+      ? (doc.scrollTop/max)*100
+      : 0;
+
 
     document
-    .getElementById("bar")
-    .style.width=
-    p+"%";
+      .getElementById("bar")
+      .style.width =
+      percent+"%";
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
 
-
-/* ==========================================
-   DOUBLE TAP
-   ========================================== */
-
-/*
-   Double tap hanya berlaku untuk SATU jari.
-   Jadi tidak bentrok dengan pinch zoom.
-*/
-
-let lastTap=0;
-
-document.addEventListener(
-  "touchend",
-  function(e){
-
-    /*
-     * Kalau sebelumnya pinch,
-     * jangan dianggap double tap.
-     */
-
-    if(wasPinching){
-
-      wasPinching=false;
-
-      lastTap=0;
-
-      return;
-
-    }
-
-
-    /*
-     * Hanya proses single-touch.
-     */
-
-    if(e.changedTouches.length!==1){
-
-      lastTap=0;
-
-      return;
-
-    }
-
-
-    const now=
-    Date.now();
-
-
-    if(
-      now-lastTap<300
-    ){
-
-      zoom=
-      zoom>1
-      ? 1
-      : 2;
-
-      apply();
-
-      show(
-        Math.round(zoom*100)+"%"
-      );
-
-      lastTap=0;
-
-    }else{
-
-      lastTap=now;
-
-    }
-
-  },
-  {passive:true}
-);
 
 
 /* ==========================================
@@ -575,8 +837,16 @@ let pinchBase=1;
 
 let isPinching=false;
 
+
+/*
+ * Menandai bahwa touch terakhir
+ * adalah pinch.
+ */
+
 let wasPinching=false;
 
+
+/* Hitung jarak dua jari */
 
 function getDistance(a,b){
 
@@ -591,11 +861,17 @@ function getDistance(a,b){
 }
 
 
-/* MULAI PINCH */
+/* ==========================================
+   TOUCH START
+   ========================================== */
 
 document.addEventListener(
   "touchstart",
   function(e){
+
+    /*
+     * Dua jari = PINCH
+     */
 
     if(e.touches.length===2){
 
@@ -603,16 +879,19 @@ document.addEventListener(
 
       wasPinching=true;
 
-      pinchStart=
-      getDistance(
-        e.touches[0],
-        e.touches[1]
-      );
+
+      pinchStart =
+        getDistance(
+          e.touches[0],
+          e.touches[1]
+        );
+
 
       pinchBase=zoom;
 
+
       /*
-       * Matikan double-tap sementara
+       * Batalkan double-tap
        */
 
       lastTap=0;
@@ -620,15 +899,24 @@ document.addEventListener(
     }
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
 
 
-/* GERAK PINCH */
+
+/* ==========================================
+   TOUCH MOVE
+   ========================================== */
 
 document.addEventListener(
   "touchmove",
   function(e){
+
+    /*
+     * Pinch hanya kalau ada dua jari
+     */
 
     if(
       e.touches.length===2 &&
@@ -636,23 +924,33 @@ document.addEventListener(
       pinchStart>0
     ){
 
-      const current=
-      getDistance(
-        e.touches[0],
-        e.touches[1]
-      );
+      const current =
+        getDistance(
+          e.touches[0],
+          e.touches[1]
+        );
 
 
-      zoom=
-      pinchBase*
-      (current/pinchStart);
+      let newZoom =
+        pinchBase *
+        (current/pinchStart);
 
 
-      zoom=
-      Math.max(
-        0.5,
-        Math.min(3,zoom)
-      );
+      /*
+       * Batas zoom
+       */
+
+      newZoom =
+        Math.max(
+          0.5,
+          Math.min(
+            3,
+            newZoom
+          )
+        );
+
+
+      zoom=newZoom;
 
 
       apply();
@@ -660,53 +958,139 @@ document.addEventListener(
     }
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
 
 
-/* SELESAI PINCH */
+
+/* ==========================================
+   TOUCH END
+   ========================================== */
 
 document.addEventListener(
   "touchend",
   function(e){
 
+    /*
+     * Kalau sedang pinch,
+     * jangan reset zoom.
+     */
+
+    if(isPinching){
+
+      if(e.touches.length<2){
+
+        isPinching=false;
+
+        pinchStart=0;
+
+        /*
+         * Zoom dibiarkan apa adanya.
+         */
+
+        show(
+          Math.round(zoom*100)+"%"
+        );
+
+      }
+
+      return;
+
+    }
+
+
+    /*
+     * Kalau bukan pinch,
+     * proses double tap.
+     */
+
     if(
-      isPinching &&
-      e.touches.length<2
+      e.changedTouches.length!==1
     ){
 
-      isPinching=false;
+      lastTap=0;
 
-      pinchStart=0;
+      return;
+
+    }
+
+
+    const now =
+      Date.now();
+
+
+    if(
+      now-lastTap<300
+    ){
 
       /*
-       * PENTING:
-       * zoom TIDAK di-reset.
+       * Double tap:
+       * 100% <-> 200%
        */
+
+      zoom =
+        zoom>1
+        ? 1
+        : 2;
+
+
+      apply();
+
 
       show(
         Math.round(zoom*100)+"%"
       );
 
+
+      lastTap=0;
+
+    }else{
+
+      lastTap=now;
+
     }
 
   },
-  {passive:true}
+  {
+    passive:true
+  }
 );
 
 
 /* ==========================================
-   DISABLE CONTEXT MENU / DRAG
+   DOUBLE TAP TIMER
+   ========================================== */
+
+let lastTap=0;
+
+
+/* ==========================================
+   DISABLE CONTEXT MENU
    ========================================== */
 
 document.addEventListener(
   "contextmenu",
-  e=>e.preventDefault()
+  function(e){
+
+    e.preventDefault();
+
+  }
 );
+
+
+/* ==========================================
+   DISABLE IMAGE DRAG
+   ========================================== */
 
 document.addEventListener(
   "dragstart",
-  e=>e.preventDefault()
+  function(e){
+
+    e.preventDefault();
+
+  }
 );
 
 
@@ -716,10 +1100,10 @@ document.addEventListener(
 
 document.addEventListener(
   "keydown",
-  e=>{
+  function(e){
 
     if(
-      (e.ctrlKey||e.metaKey) &&
+      (e.ctrlKey || e.metaKey) &&
       ["p","s"].includes(
         e.key.toLowerCase()
       )
@@ -733,6 +1117,7 @@ document.addEventListener(
 );
 
 </script>
+
 
 </body>
 </html>
